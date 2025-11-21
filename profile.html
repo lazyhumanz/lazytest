@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Profile | QMS</title>
+<meta name="description" content="Quality Management System Dashboard">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAtOTYwIDk2MCA5NjAiIHdpZHRoPSIyNHB4IiBmaWxsPSIjMWY5ZTRiIj48cGF0aCBkPSJNMjAwLTEyMHEtMzMgMC01Ni41LTIzLjVUMTIwLTIwMHYtNTYwcTAtMzMgMjMuNS01Ni41VDIwMC04NDBoNTYwcTMzIDAgNTYuNSAyMy41VDg0MC03NjB2NTYwcTAgMzMtMjMuNSA1Ni41VDc2MC0xMjBIMjAwWm00OTEtODBoNjl2LTY5bC02OSA2OVptLTQ1NyAwaDczbDEyMC0xMjBoODVMNDUyLTIwMGg2NGwxMjAtMTIwaDg1TDU0MS0yMDBoNjVsMTIwLTEyMGgzNHYtNDQwSDIwMHY1MDlsNjktNjloODVMNDM0LTIwMFptNzItMjAwLTU2LTU2IDE3Ny0xNzcgODAgODAgMTQ3LTE0NyA1NiA1Ni0yMDMgMjA0LTgwLTgwLTEyMSAxMjBaIi8+PC9zdmc+">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="sidebar.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a733e',
+                        'primary-dark': '#0d5e3a',
+                        'primary-light': '#e6f4ed',
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="env-config.js"></script>
+    <script src="supabase-config.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="auth-check.js"></script>
+    <script src="confirmation-dialog.js"></script>
+    <script src="load-sidebar.js"></script>
+    <script src="search.js"></script>
+    <script src="form-validation.js"></script>
+
+</head>
+
+<body>
+<!-- Sidebar will be loaded dynamically by load-sidebar.js -->
+ <main class="main-content" role="main">
+    <p class="page-heading">Profile</p>
+    <div class="mb-4"></div>
+
+<!-- Profile Content -->
+<div class="w-full max-w-6xl mx-auto px-4" style="margin-top: 2rem;">
+    <!-- Notification Toast -->
+    <div id="notificationToast" class="hidden fixed top-20 right-4 z-50 max-w-sm">
+        <div class="bg-white rounded-lg shadow-lg border p-4 flex items-start gap-3">
+            <div id="notificationIcon" class="flex-shrink-0 mt-0.5"></div>
+            <div class="flex-1">
+                <p id="notificationMessage" class="text-sm text-gray-800"></p>
+    </div>
+            <button onclick="hideNotification()" class="text-gray-400 hover:text-gray-600 flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+            </button>
+        </div>
+    </div>
+        
+    <!-- Loading State -->
+    <div id="loadingState" class="text-center py-12 text-gray-500">
+        <div class="inline-block w-9 h-9 border-[3px] border-gray-200 border-t-primary rounded-full animate-spin mb-3"></div>
+        <p class="text-sm">Loading profile...</p>
+                </div>
+
+    <!-- Profile Content (hidden initially) -->
+    <div id="profileContent" class="hidden">
+        <!-- Main Profile Card -->
+        <div class="bg-white rounded-lg shadow-lg">
+            <div class="px-8 pt-8 pb-8">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Left Section: Profile Summary -->
+                    <div class="lg:col-span-1">
+                        <!-- Profile Picture -->
+                        <div class="relative mb-6 flex justify-center lg:justify-start">
+                            <div class="relative">
+                                <div id="profileAvatar" onclick="document.getElementById('avatarInput').click()" class="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-primary-dark border-4 border-white shadow-xl flex items-center justify-center overflow-hidden cursor-pointer hover:opacity-90 transition-opacity">
+                                    <svg class="w-16 h-16 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm0 14c-2.03 0-4.43-.82-6.14-2.88C7.55 15.8 9.68 15 12 15s4.45.8 6.14 2.12C16.43 19.18 14.03 20 12 20z"/>
+                    </svg>
+                </div>
+                                <div id="statusIndicator" class="absolute bottom-2 right-2 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                                <input type="file" id="avatarInput" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+                </div>
+            </div>
+
+                        <!-- Name and Email -->
+                        <div class="mb-6">
+                            <h1 id="profileName" class="text-2xl font-bold text-gray-800 mb-1">Loading...</h1>
+                            <p id="profileEmail" class="text-gray-500 text-sm">Loading...</p>
+        </div>
+    
+                        <!-- Statistics -->
+                        <div class="space-y-3 mb-6">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600 text-sm">Access Level</span>
+                                <span id="accessLevelStat" class="text-primary font-semibold text-right">-</span>
+                </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600 text-sm">Account Status</span>
+                                <span id="accountStatus" class="text-green-500 font-semibold text-right">Active</span>
+            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600 text-sm">Department</span>
+                                <span id="statDepartment" class="text-gray-700 font-semibold text-right">-</span>
+                    </div>
+                            <div id="teamSupervisorStat" class="flex justify-between items-center hidden">
+                                <span class="text-gray-600 text-sm">Team Supervisor</span>
+                                <span id="teamSupervisorName" class="text-gray-700 font-semibold text-right">-</span>
+                </div>
+                            <div id="qualitySupervisorStat" class="flex justify-between items-center hidden">
+                                <span class="text-gray-600 text-sm">Quality Mentor</span>
+                                <span id="qualitySupervisorName" class="text-gray-700 font-semibold text-right">-</span>
+                    </div>
+                </div>
+
+                    </div>
+
+                    <!-- Right Section: Tabs and Form -->
+                    <div class="lg:col-span-2">
+                        <!-- Tabs -->
+                        <div class="border-b border-gray-200 mb-6">
+                            <nav class="flex space-x-8">
+                                <button onclick="switchTab('account')" id="tab-account" class="tab-button active py-4 px-1 border-b-2 border-primary font-medium text-sm text-gray-900">
+                                    Account Details
+                                </button>
+                            </nav>
+        </div>
+
+                        <!-- Tab Content -->
+                        <div id="tab-content">
+                            <!-- Account Details Tab -->
+                            <div id="content-account" class="tab-content-panel">
+                                <form id="profileForm" class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Left Column -->
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                                <input type="text" id="fullName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm bg-gray-50" placeholder="Full Name" readonly>
+                </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Employee ID</label>
+                                                <input type="text" id="employeeId" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm bg-gray-50" placeholder="Employee ID" readonly>
+            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                                                <input type="text" id="department" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm bg-gray-50" placeholder="Department" readonly>
+                    </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                                                <input type="text" id="country" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm bg-gray-50" placeholder="Country" readonly>
+                </div>
+                        </div>
+
+                                        <!-- Right Column -->
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Email address</label>
+                                                <input type="email" id="emailAddress" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm bg-gray-50" placeholder="email@example.com" readonly>
+                    </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Team</label>
+                                                <input type="text" id="team" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm bg-gray-50" placeholder="Team" readonly>
+                    </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Designation</label>
+                                                <input type="text" id="designation" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm bg-gray-50" placeholder="Designation" readonly>
+                </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Access Level</label>
+                                                <input type="text" id="accessLevel" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm bg-gray-50" placeholder="Access Level" readonly>
+                    </div>
+                </div>
+                    </div>
+
+                                    <div class="pt-4 border-t border-gray-200">
+                                        <button type="button" onclick="openResetPasswordModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-medium transition-colors">
+                                            Reset Password
+                                        </button>
+                </div>
+                                </form>
+        </div>
+
+                </div>
+            </div>
+                    </div>
+                </div>
+                    </div>
+    </div>
+</div>
+
+
+<!-- Reset Password Modal -->
+<div id="resetPasswordModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-3">
+    <div class="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl">
+        <div class="flex justify-between items-center p-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Reset Password</h3>
+            <button onclick="closeResetPasswordModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+        </div>
+        <div class="p-4">
+            <!-- Warning/Success Message Area -->
+            <div id="passwordModalMessage" class="hidden mb-4 p-3 rounded-lg text-sm"></div>
+            <form id="resetPasswordForm">
+                <div class="mb-4">
+                    <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-2">Current Password *</label>
+                    <input type="password" id="currentPassword" required placeholder="Enter current password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm">
+                </div>
+                <div class="mb-4">
+                    <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-2">New Password *</label>
+                    <input type="password" id="newPassword" required placeholder="Enter new password" minlength="6" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm">
+                    <small class="text-gray-500 text-xs mt-1 block">Password must be at least 6 characters long</small>
+                </div>
+                <div class="mb-4">
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password *</label>
+                    <input type="password" id="confirmPassword" required placeholder="Confirm new password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm">
+                </div>
+            </form>
+        </div>
+        <div class="flex justify-end gap-2 p-4 border-t border-gray-200">
+            <button type="button" onclick="closeResetPasswordModal()" class="bg-white text-gray-700 border border-gray-300 rounded-lg px-4 py-2 text-sm font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+            <button type="button" onclick="savePasswordReset()" class="bg-primary hover:bg-primary-dark text-white rounded-lg px-4 py-2 text-sm font-semibold transition-colors">Reset Password</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Custom animations */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+.animate-spin {
+    animation: spin 0.8s linear infinite;
+}
+</style>
+
+<script>
+// Global variables
+let currentUserData = null;
+let allUsers = [];
+let availableChannels = [];
+
+// Profile page functionality
+document.addEventListener('DOMContentLoaded', function() {
+    waitForSupabaseAndLoadProfile();
+});
+
+async function waitForSupabaseAndLoadProfile() {
+    let attempts = 0;
+    const maxAttempts = 50;
+    
+    while (attempts < maxAttempts) {
+        if (window.SupabaseUsers && window.supabaseClient) {
+            await loadAllUsers(); // Load all users first so supervisor names can be resolved
+            await loadChannels();
+            await loadUserProfile();
+            return;
+        }
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+    }
+    
+    document.getElementById('loadingState').innerHTML = 
+        '<div class="error">Supabase not initialized. Please refresh the page.</div>';
+}
+
+async function loadChannels() {
+    try {
+        if (!window.supabaseClient) return;
+        
+        const { data, error } = await window.supabaseClient
+            .from('channels')
+            .select('name')
+            .eq('is_active', true)
+            .order('name', { ascending: true });
+        
+        if (error) throw error;
+        
+        availableChannels = data.map(channel => channel.name);
+    } catch (error) {
+        console.error('Error loading channels:', error);
+        availableChannels = [];
+    }
+}
+
+async function loadAllUsers() {
+    try {
+        if (!window.SupabaseUsers) return;
+        
+        allUsers = await window.SupabaseUsers.getAllUsers({
+            orderBy: { column: 'name', ascending: true }
+        });
+    } catch (error) {
+        console.error('Error loading users:', error);
+        allUsers = [];
+    }
+}
+
+async function loadUserProfile() {
+    try {
+        const userInfo = localStorage.getItem('userInfo');
+        if (!userInfo) {
+            document.getElementById('loadingState').innerHTML = 
+                '<div class="error">No user information found. Please login again.</div>';
+            return;
+        }
+        
+        const user = JSON.parse(userInfo);
+        
+        if (!user || !user.email) {
+            document.getElementById('loadingState').innerHTML = 
+                '<div class="error">Invalid user information. Please login again.</div>';
+            return;
+        }
+        
+        // Fetch full user data from Supabase
+        const userData = await window.SupabaseUsers.getUserByEmail(user.email);
+        
+        if (!userData) {
+            document.getElementById('loadingState').innerHTML = 
+                '<div class="error">User data not found in database.</div>';
+            return;
+        }
+        
+        currentUserData = userData;
+        
+        // Hide loading, show content
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('profileContent').classList.remove('hidden');
+        
+        // Update profile with fetched data
+        updateProfileDisplay(userData);
+        
+    } catch (error) {
+        console.error('Error loading user profile:', error);
+        document.getElementById('loadingState').innerHTML = 
+            '<div class="error">Error loading profile: ' + error.message + '</div>';
+    }
+}
+
+function updateProfileDisplay(userData) {
+    // Update header
+    updateProfileHeader(userData);
+    
+    // Update stats
+    updateStats(userData);
+    
+    // Update details
+    updateProfileDetails(userData);
+}
+
+function updateProfileHeader(userData) {
+    // Name
+    const profileName = document.getElementById('profileName');
+    if (profileName && userData.name) {
+        profileName.textContent = userData.name;
+    }
+    
+    // Email
+    const profileEmail = document.getElementById('profileEmail');
+    if (profileEmail && userData.email) {
+        profileEmail.textContent = userData.email;
+    }
+    
+    // Avatar
+    const profileAvatar = document.getElementById('profileAvatar');
+    if (profileAvatar) {
+        if (userData.avatar_url) {
+            profileAvatar.innerHTML = `<img src="${userData.avatar_url}" alt="Profile Picture" class="w-full h-full object-cover">`;
+        } else if (userData.name) {
+            const initials = userData.name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
+            profileAvatar.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-primary to-primary-dark text-white flex items-center justify-center font-bold text-2xl">${initials}</div>`;
+        }
+    }
+    
+    // Status indicator
+    const statusIndicator = document.getElementById('statusIndicator');
+    if (statusIndicator) {
+        if (!userData.is_active) {
+            statusIndicator.classList.remove('bg-green-500');
+            statusIndicator.classList.add('bg-red-500');
+        }
+    }
+}
+
+function updateStats(userData) {
+    // Access Level
+    const accessLevelStat = document.getElementById('accessLevelStat');
+    if (accessLevelStat) {
+        accessLevelStat.textContent = userData.role || '-';
+    }
+    
+    // Account status
+    const accountStatus = document.getElementById('accountStatus');
+    if (accountStatus) {
+        accountStatus.textContent = userData.is_active ? 'Active' : 'Inactive';
+        if (!userData.is_active) {
+            accountStatus.classList.remove('text-green-500');
+            accountStatus.classList.add('text-red-500');
+        }
+    }
+    
+    // Department
+    const statDepartment = document.getElementById('statDepartment');
+    if (statDepartment) {
+        statDepartment.textContent = userData.department || '-';
+    }
+    
+    // Team Supervisor
+    const teamSupervisorStat = document.getElementById('teamSupervisorStat');
+    const teamSupervisorName = document.getElementById('teamSupervisorName');
+    if (userData.team_supervisor) {
+        // Try to find supervisor by email (case-insensitive)
+        const supervisor = allUsers.find(u => 
+            u.email && userData.team_supervisor && 
+            u.email.toLowerCase() === userData.team_supervisor.toLowerCase()
+        );
+        if (teamSupervisorName) {
+            if (supervisor && supervisor.name) {
+                teamSupervisorName.textContent = supervisor.name;
+            } else {
+                // If supervisor not found, show email as fallback
+                teamSupervisorName.textContent = userData.team_supervisor;
+            }
+        }
+        if (teamSupervisorStat) {
+            teamSupervisorStat.classList.remove('hidden');
+        }
+    }
+    
+    // Quality Mentor
+    const qualitySupervisorStat = document.getElementById('qualitySupervisorStat');
+    const qualitySupervisorName = document.getElementById('qualitySupervisorName');
+    if (userData.quality_mentor) {
+        // Try to find supervisor by email (case-insensitive)
+        const supervisor = allUsers.find(u => 
+            u.email && userData.quality_mentor && 
+            u.email.toLowerCase() === userData.quality_mentor.toLowerCase()
+        );
+        if (qualitySupervisorName) {
+            if (supervisor && supervisor.name) {
+                qualitySupervisorName.textContent = supervisor.name;
+            } else {
+                // If supervisor not found, show email as fallback
+                qualitySupervisorName.textContent = userData.quality_mentor;
+            }
+        }
+        if (qualitySupervisorStat) {
+            qualitySupervisorStat.classList.remove('hidden');
+        }
+    }
+}
+
+function updateProfileDetails(userData) {
+    // Form fields
+    const fullName = document.getElementById('fullName');
+    if (fullName) fullName.value = userData.name || '';
+    
+    const emailAddress = document.getElementById('emailAddress');
+    if (emailAddress) emailAddress.value = userData.email || '';
+    
+    const employeeId = document.getElementById('employeeId');
+    if (employeeId) employeeId.value = userData.employee_id || '';
+    
+    const country = document.getElementById('country');
+    if (country) country.value = userData.country || '';
+    
+    const department = document.getElementById('department');
+    if (department) department.value = userData.department || '';
+    
+    const team = document.getElementById('team');
+    if (team) team.value = userData.team || '';
+    
+    const designation = document.getElementById('designation');
+    if (designation) designation.value = userData.designation || '';
+    
+    const accessLevel = document.getElementById('accessLevel');
+    if (accessLevel) accessLevel.value = userData.role || '';
+}
+
+function switchTab(tabName) {
+    // Hide all tab panels
+    document.querySelectorAll('.tab-content-panel').forEach(panel => {
+        panel.classList.add('hidden');
+    });
+    
+    // Remove active class from all tabs
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('border-primary', 'text-gray-900');
+        button.classList.add('border-transparent', 'text-gray-500');
+    });
+    
+    // Show selected tab panel
+    const selectedPanel = document.getElementById('content-' + tabName);
+    if (selectedPanel) {
+        selectedPanel.classList.remove('hidden');
+    }
+    
+    // Add active class to selected tab
+    const selectedTab = document.getElementById('tab-' + tabName);
+    if (selectedTab) {
+        selectedTab.classList.remove('border-transparent', 'text-gray-500');
+        selectedTab.classList.add('border-primary', 'text-gray-900');
+    }
+}
+
+async function updateProfile() {
+    if (!currentUserData) return;
+    
+    const fullName = document.getElementById('fullName').value;
+    const country = document.getElementById('country').value;
+    
+    try {
+        const updateData = {};
+        if (fullName) updateData.name = fullName;
+        if (country) updateData.country = country;
+        
+        if (Object.keys(updateData).length === 0) {
+            showNotification('No changes to save', 'warning');
+            return;
+        }
+        
+        const updateResult = await window.SupabaseUsers.updateUser(currentUserData.email, updateData);
+        
+        if (updateResult.error) {
+            throw new Error(updateResult.error.message);
+        }
+        
+        // Reload profile data
+        await loadUserProfile();
+        showNotification('Profile updated successfully!', 'success');
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        showNotification('Error updating profile: ' + error.message, 'error');
+    }
+}
+
+function copyProfileUrl() {
+    // Placeholder function - can be implemented if needed
+    console.log('Copy profile URL');
+}
+
+async function handleAvatarUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        showNotification('Please select an image file', 'error');
+        return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        showNotification('Image size must be less than 5MB', 'error');
+        return;
+    }
+    
+    try {
+        // Read file as data URL
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const imageDataUrl = e.target.result;
+            
+            // Update avatar display immediately
+            const profileAvatar = document.getElementById('profileAvatar');
+            if (profileAvatar) {
+                profileAvatar.innerHTML = `<img src="${imageDataUrl}" alt="Profile Picture" class="w-full h-full object-cover">`;
+            }
+            
+            // Upload to Supabase Storage if available, or store as base64
+            // For now, we'll store it in the user's avatar_url field
+            if (window.SupabaseUsers && currentUserData) {
+                try {
+                    // If you have Supabase Storage configured, upload the file there
+                    // Otherwise, store as base64 (not recommended for production)
+                    const updateResult = await window.SupabaseUsers.updateUser(currentUserData.email, {
+                        avatar_url: imageDataUrl
+                    });
+                    
+                    if (updateResult.error) {
+                        throw new Error(updateResult.error.message);
+                    }
+                    
+                    // Update current user data
+                    currentUserData.avatar_url = imageDataUrl;
+                    showNotification('Profile picture updated successfully!', 'success');
+                } catch (error) {
+                    console.error('Error uploading avatar:', error);
+                    showNotification('Error uploading profile picture: ' + error.message, 'error');
+                    // Revert avatar display on error
+                    updateProfileHeader(currentUserData);
+                }
+            }
+        };
+        reader.readAsDataURL(file);
+    } catch (error) {
+        console.error('Error reading file:', error);
+        showNotification('Error reading image file', 'error');
+    }
+}
+
+function openResetPasswordModal() {
+    if (!currentUserData) return;
+    
+    // Reset form
+    document.getElementById('resetPasswordForm').reset();
+    document.getElementById('resetPasswordModal').classList.remove('hidden');
+}
+
+function closeResetPasswordModal() {
+    document.getElementById('resetPasswordModal').classList.add('hidden');
+    document.getElementById('resetPasswordForm').reset();
+    hidePasswordModalMessage();
+}
+
+// Helper function to show warning/success message in password modal
+function showPasswordModalMessage(message, type = 'error') {
+    const messageDiv = document.getElementById('passwordModalMessage');
+    if (!messageDiv) return;
+    
+    messageDiv.classList.remove('hidden', 'bg-red-50', 'border-red-200', 'text-red-800', 'bg-green-50', 'border-green-200', 'text-green-800');
+    
+    if (type === 'error') {
+        messageDiv.classList.add('bg-red-50', 'border', 'border-red-200', 'text-red-800');
+    } else if (type === 'success') {
+        messageDiv.classList.add('bg-green-50', 'border', 'border-green-200', 'text-green-800');
+    }
+    
+    messageDiv.textContent = message;
+    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function hidePasswordModalMessage() {
+    const messageDiv = document.getElementById('passwordModalMessage');
+    if (messageDiv) {
+        messageDiv.classList.add('hidden');
+        messageDiv.textContent = '';
+    }
+}
+
+// Helper function to show notification toast
+function showNotification(message, type = 'success') {
+    const toast = document.getElementById('notificationToast');
+    const icon = document.getElementById('notificationIcon');
+    const messageEl = document.getElementById('notificationMessage');
+    
+    if (!toast || !icon || !messageEl) return;
+    
+    // Clear previous classes
+    icon.innerHTML = '';
+    toast.classList.remove('hidden');
+    
+    if (type === 'success') {
+        icon.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+    } else if (type === 'error') {
+        icon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+    } else if (type === 'warning') {
+        icon.innerHTML = '<svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
+    }
+    
+    messageEl.textContent = message;
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        hideNotification();
+    }, 5000);
+}
+
+function hideNotification() {
+    const toast = document.getElementById('notificationToast');
+    if (toast) {
+        toast.classList.add('hidden');
+    }
+}
+
+// Hash password using SHA-256
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+}
+
+async function savePasswordReset() {
+    if (!currentUserData) return;
+    
+    // Clear any previous messages
+    hidePasswordModalMessage();
+    
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    // Validation
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        showPasswordModalMessage('Please fill in all fields', 'error');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        showPasswordModalMessage('Password must be at least 6 characters long', 'error');
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        showPasswordModalMessage('New password and confirm password do not match', 'error');
+        return;
+    }
+    
+    try {
+        // Get current user data from database
+        const user = await window.SupabaseUsers.getUserByEmail(currentUserData.email);
+        
+        if (!user) {
+            showPasswordModalMessage('User not found in database', 'error');
+            return;
+        }
+        
+        // Verify current password
+        if (!user.password_hash) {
+            // If no password hash exists, allow setting a new password
+            // (This handles the case where user doesn't have a password set yet)
+        } else {
+            // Check if password_hash is a SHA-256 hash (64 hex characters)
+            const isHashed = /^[a-f0-9]{64}$/i.test(user.password_hash);
+            
+            let passwordValid = false;
+            
+            if (isHashed) {
+                // Password is stored as hash, so hash the entered password and compare
+                const currentPasswordHash = await hashPassword(currentPassword);
+                passwordValid = user.password_hash === currentPasswordHash;
+            } else {
+                // Password is stored as plain text (backwards compatibility)
+                passwordValid = user.password_hash === currentPassword;
+            }
+            
+            if (!passwordValid) {
+                showPasswordModalMessage('Current password is incorrect', 'error');
+                return;
+            }
+        }
+        
+        // Hash the new password
+        const newPasswordHash = await hashPassword(newPassword);
+        
+        // Update password hash in database
+        const updateResult = await window.SupabaseUsers.updateUser(currentUserData.email, {
+            password_hash: newPasswordHash
+        });
+        
+        if (updateResult.error) {
+            throw new Error(updateResult.error.message);
+        }
+        
+        // Show success message in modal
+        showPasswordModalMessage('Password reset successfully!', 'success');
+        
+        // Close modal and reset form after a short delay
+        setTimeout(() => {
+        closeResetPasswordModal();
+            showNotification('Password reset successfully!', 'success');
+        }, 1500);
+        
+    } catch (error) {
+        console.error('Error resetting password:', error);
+        showPasswordModalMessage('Error resetting password: ' + error.message, 'error');
+    }
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('resetPasswordModal');
+    if (event.target === modal) {
+        closeResetPasswordModal();
+    }
+});
+
+// Initialize tab on load
+document.addEventListener('DOMContentLoaded', function() {
+    // Set default active tab
+    switchTab('account');
+});
+</script>
+
+</main>
+</body>
+</html>

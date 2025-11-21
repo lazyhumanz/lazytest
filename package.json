@@ -1,0 +1,22 @@
+{
+  "name": "web-qms-v2",
+  "version": "1.0.0",
+  "scripts": {
+    "build:config": "node scripts/generate-env-config.js",
+    "prebuild": "npm run build:config",
+    "vercel-build": "npm run build:config",
+    "dev": "node scripts/dev-server.js",
+    "start": "npm run dev",
+    "sync:admins": "node scripts/sync-intercom-admins.js"
+  },
+  "dependencies": {
+    "@rharkor/logger": "^1.3.3",
+    "@supabase/supabase-js": "^2.76.1",
+    "csv-parser": "^3.2.0"
+  },
+  "devDependencies": {
+    "chokidar": "^4.0.3",
+    "dotenv": "^17.2.3",
+    "ws": "^8.18.3"
+  }
+}

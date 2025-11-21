@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Reversal Management | QMS</title>
+<meta name="description" content="Quality Management System - Reversal Management">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAtOTYwIDk2MCA5NjAiIHdpZHRoPSIyNHB4IiBmaWxsPSIjMWY5ZTRiIj48cGF0aCBkPSJNMjAwLTEyMHEtMzMgMC01Ni41LTIzLjVUMTIwLTIwMHYtNTYwcTAtMzMgMjMuNS01Ni41VDIwMC04NDBoNTYwcTMzIDAgNTYuNSAyMy41VDg0MC03NjB2NTYwcTAgMzMtMjMuNSA1Ni41VDc2MC0xMjBIMjAwWm00OTEtODBoNjl2LTY5bC02OSA2OVptLTQ1NyAwaDczbDEyMC0xMjBoODVMNDUyLTIwMGg2NGwxMjAtMTIwaDg1TDU0MS0yMDBoNjVsMTIwLTEyMGgzNHYtNDQwSDIwMHY1MDlsNjktNjloODVMNDM0LTIwMFptNzItMjAwLTU2LTU2IDE3Ny0xNzcgODAgODAgMTQ3LTE0NyA1NiA1Ni0yMDMgMjA0LTgwLTgwLTEyMSAxMjBaIi8+PC9zdmc+">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="sidebar.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="env-config.js"></script>
+    <script src="supabase-config.js"></script>
+    <script src="auth-check.js"></script>
+    <script src="access-control.js"></script>
+    <script src="confirmation-dialog.js"></script>
+    <script src="load-sidebar.js"></script>
+    <script src="search.js"></script>
+    <script src="form-validation.js"></script>
+    <script src="keyboard-shortcuts.js"></script>
+    <script src="timezone-utils.js"></script>
+    <script src="date-filter-utils.js"></script>
+    <style>
+        /* Reversal Management Specific Styles */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.125rem;
+            width: 100%;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            border: 0.0469rem solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 0.1875rem 0.2812rem -0.0469rem rgba(0, 0, 0, 0.1);
+            transform: translateY(-0.0938rem);
+        }
+
+        .stat-value {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.1875rem;
+        }
+
+        .stat-title {
+            font-size: 0.5625rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Date Range Picker */
+        .date-picker-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .date-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.375rem;
+            background: var(--background-white);
+            border: 0.0469rem solid var(--border-light);
+            border-radius: 0.375rem;
+            box-shadow: var(--shadow-lg);
+            padding: 0.75rem;
+            z-index: 1000;
+            min-width: 9.8438rem;
+        }
+
+        .date-dropdown-menu.active {
+            display: block;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.4688rem 0.75rem;
+            background-color: var(--background-white);
+            color: var(--text-color);
+            border: 0.0469rem solid var(--border-light);
+            border-radius: 0.375rem;
+            font-size: 0.6562rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: var(--font-family);
+        }
+
+        .action-btn:hover {
+            background-color: var(--gray-50);
+            border-color: var(--primary-color);
+        }
+
+        .action-btn.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+        }
+
+        .action-btn svg {
+            width: 0.75rem;
+            height: 0.75rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5625rem;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+        }
+
+        .filter-label {
+            font-size: 0.5625rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .filter-input {
+            padding: 0.375rem 0.5625rem;
+            border: 0.0469rem solid var(--border-light);
+            border-radius: 0.2812rem;
+            font-size: 0.6562rem;
+            font-family: var(--font-family);
+            background-color: var(--background-white);
+            color: var(--text-color);
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+
+<body>
+<!-- Sidebar will be loaded dynamically by load-sidebar.js -->
+ <main class="main-content" role="main">
+    <p class="page-heading">Reversal Management</p>
+    <div style="margin-bottom: 1.125rem; width: 100%;"></div>
+
+    <!-- Action Buttons -->
+    <div class="header-actions" style="margin-top: 2rem; margin-bottom: 1.125rem;">
+        <div style="display: flex; gap: 0.5625rem; align-items: center; flex-wrap: wrap;">
+            <!-- Week Navigation -->
+            <div style="display: flex; align-items: center; gap: 0.5625rem;">
+                <button class="action-btn" id="prevWeekBtn" style="padding: 0.4688rem 0.5625rem;" title="Previous Week">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 0.75rem; height: 0.75rem;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                <div class="action-btn" id="weekDisplay" style="padding: 0.4688rem 0.75rem; cursor: default; background-color: var(--primary-color); color: var(--white); border-color: var(--primary-color);">
+                    <span id="weekText">Week -</span>
+                </div>
+                <button class="action-btn" id="nextWeekBtn" style="padding: 0.4688rem 0.5625rem;" title="Next Week">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 0.75rem; height: 0.75rem;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+            <!-- Date Range Picker -->
+            <div class="date-picker-dropdown">
+                <button class="action-btn" id="dateBtn">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span id="dateBtnText">Date Range</span>
+                    <svg style="width: 0.5625rem; height: 0.5625rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div class="date-dropdown-menu" id="dateDropdown">
+                    <div class="filter-group">
+                        <label class="filter-label">Start Date</label>
+                        <input type="date" class="filter-input" id="startDate">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">End Date</label>
+                        <input type="date" class="filter-input" id="endDate">
+                    </div>
+                    <div style="display: flex; gap: 0.375rem; margin-top: 0.375rem;">
+                        <button class="action-btn" style="flex: 1;" onclick="applyDateFilter()">Apply</button>
+                        <button class="action-btn" style="flex: 1;" onclick="clearDateFilter()">Clear</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Quick Date Filters -->
+            <div style="display: flex; align-items: center; gap: 0.375rem;">
+                <button class="action-btn quick-date-btn" id="todayBtn" onclick="applyQuickDateFilter('today')">Today</button>
+                <button class="action-btn quick-date-btn" id="yesterdayBtn" onclick="applyQuickDateFilter('yesterday')">Yesterday</button>
+                <button class="action-btn quick-date-btn active" id="thisMonthBtn" onclick="applyQuickDateFilter('thisMonth')">This Month</button>
+            </div>
+            <button id="filterToggleBtn" onclick="toggleFilters()" class="action-btn" style="background-color: var(--primary-color); color: var(--white); border-color: var(--primary-color);">
+                <svg style="width: 0.75rem; height: 0.75rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+                    <path d="M440-160q-17 0-28.5-11.5T400-200v-240L168-736q-15-20-4.5-42t36.5-22h560q26 0 36.5 22t-4.5 42L560-440v240q0 17-11.5 28.5T520-160h-80Z"/>
+                </svg>
+                Filters
+            </button>
+            <button id="viewAllBtn" onclick="toggleViewAll()" style="padding: 0.375rem 0.75rem; background-color: #6b7280; color: white; border: none; border-radius: 0.2812rem; font-size: 0.6562rem; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">View All</button>
+        </div>
+        <button id="exportBtn" style="padding: 0.375rem 0.75rem; background-color: #1A733E; color: white; border: none; border-radius: 0.2812rem; font-size: 0.6562rem; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">Export</button>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="stats-grid" style="margin-top: 1.125rem;">
+        <div class="stat-card">
+            <div class="stat-value" id="totalReversals">-</div>
+            <div class="stat-title">Total Reversals</div>
+                </div>
+        <div class="stat-card">
+            <div class="stat-value" id="pendingReversals">-</div>
+            <div class="stat-title">Pending</div>
+                </div>
+        <div class="stat-card">
+            <div class="stat-value" id="approvedReversals">-</div>
+            <div class="stat-title">Approved</div>
+                </div>
+        <div class="stat-card">
+            <div class="stat-value" id="rejectedReversals">-</div>
+            <div class="stat-title">Rejected</div>
+                </div>
+            </div>
+
+
+    <!-- Filters Section -->
+    <div id="filterPanel" style="display: none; background: #ffffff; border-radius: 0.375rem; padding: 0.75rem; border: 0.0469rem solid #e5e7eb; margin-bottom: 0.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5625rem;">
+            <div style="font-size: 0.6562rem; font-weight: 600; color: #1A733E;">Search & Filters</div>
+            <button id="clearFilters" style="padding: 0.2812rem 0.5625rem; background-color: #f9fafb; color: #374151; border: 0.0469rem solid #d1d5db; border-radius: 0.1875rem; font-size: 0.5156rem; font-family: 'Poppins', sans-serif; cursor: pointer;">Clear All</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(5.2734rem, 1fr)); gap: 0.375rem; align-items: end;">
+            <!-- Search -->
+            <div>
+                <label for="searchInput" style="font-size: 0.5156rem; font-weight: 500; color: #374151; margin-bottom: 0.0938rem; font-family: 'Poppins', sans-serif; display: block;">Search</label>
+                <input type="text" id="searchInput" placeholder="Search..." style="padding: 0.1875rem 0.2812rem; border: 0.0469rem solid #d1d5db; border-radius: 0.1875rem; font-size: 0.5156rem; font-family: 'Poppins', sans-serif; width: 100%;">
+                </div>
+            
+            <!-- Reversal Status -->
+            <div>
+                <label for="statusFilter" style="font-size: 0.5156rem; font-weight: 500; color: #374151; margin-bottom: 0.0938rem; font-family: 'Poppins', sans-serif; display: block;">Status</label>
+                <select id="statusFilter" style="padding: 0.1875rem 0.2812rem; border: 0.0469rem solid #d1d5db; border-radius: 0.1875rem; font-size: 0.5156rem; font-family: 'Poppins', sans-serif; width: 100%;">
+                    <option value="">All</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+            
+            <!-- Reversal Type -->
+            <div>
+                <label for="typeFilter" style="font-size: 0.5156rem; font-weight: 500; color: #374151; margin-bottom: 0.0938rem; font-family: 'Poppins', sans-serif; display: block;">Type</label>
+                <select id="typeFilter" style="padding: 0.1875rem 0.2812rem; border: 0.0469rem solid #d1d5db; border-radius: 0.1875rem; font-size: 0.5156rem; font-family: 'Poppins', sans-serif; width: 100%;">
+                    <option value="">All Types</option>
+                    <option value="Clarification Requested">Clarification Requested</option>
+                    <option value="Revision Requested">Revision Requested</option>
+                    </select>
+                </div>
+            
+            <!-- Date Range -->
+            <div>
+                <label for="dateFromFilter" style="font-size: 0.5156rem; font-weight: 500; color: #374151; margin-bottom: 0.0938rem; font-family: 'Poppins', sans-serif; display: block;">From Date</label>
+                <input type="date" id="dateFromFilter" style="padding: 0.1875rem 0.2812rem; border: 0.0469rem solid #d1d5db; border-radius: 0.1875rem; font-size: 0.5156rem; font-family: 'Poppins', sans-serif; width: 100%;">
+        </div>
+
+            <div>
+                <label for="dateToFilter" style="font-size: 0.5156rem; font-weight: 500; color: #374151; margin-bottom: 0.0938rem; font-family: 'Poppins', sans-serif; display: block;">To Date</label>
+                <input type="date" id="dateToFilter" style="padding: 0.1875rem 0.2812rem; border: 0.0469rem solid #d1d5db; border-radius: 0.1875rem; font-size: 0.5156rem; font-family: 'Poppins', sans-serif; width: 100%;">
+                </div>
+            </div>
+        </div>
+
+    <!-- Reversal List -->
+    <div id="reversalList" style="display: flex; flex-direction: column; gap: 0.5625rem; width: 100%;">
+        <!-- Loading indicator -->
+        <div id="loadingIndicator" style="text-align: center; padding: 1.5rem; color: #6b7280; font-family: 'Poppins', sans-serif;">
+            <p>Loading reversals...</p>
+        </div>
+    </div>
+
+    <!-- No Reversals Message -->
+    <div id="noReversalsMessage" style="display: none; text-align: center; padding: 1.5rem; color: #6b7280; font-family: 'Poppins', sans-serif;">
+        <p style="font-size: 0.75rem; margin-bottom: 0.375rem;">No reversal requests found</p>
+        <p style="font-size: 0.6562rem;">Reversal requests will appear here once submitted.</p>
+    </div>
+</main>
+
+<script>
+// Reversal Management Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        // Check page access using centralized access control
+        if (!window.accessControl || !window.accessControl.enforcePageAccess('reversal.html')) {
+            return; // Access denied, user will be redirected
+        }
+        
+        const reversalList = document.getElementById('reversalList');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const noReversalsMessage = document.getElementById('noReversalsMessage');
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const typeFilter = document.getElementById('typeFilter');
+        const clearFilters = document.getElementById('clearFilters');
+        
+        let allReversals = [];
+        let filteredReversals = [];
+        let allScorecards = [];
+        let viewingAll = false; // Track if we're viewing all reversals or just pending
+        let allReversalsLoaded = false; // Track if all reversals have been loaded
+        let pendingReversalsLoaded = false; // Track if pending reversals have been loaded
+        
+        // Week and date filter state
+        let currentWeek = null;
+        let currentWeekYear = null;
+        let useWeekFilter = false; // Don't filter by week by default - show all pending reversals
+        let dateFilter = { start: null, end: null };
+        
+        // Load scorecards first
+        async function loadScorecards() {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('scorecards')
+                    .select('*');
+                
+                if (error) throw error;
+                allScorecards = data || [];
+            } catch (error) {
+                console.error('Error loading scorecards:', error);
+            }
+        }
+        
+        // Get current user info to determine role
+        function getCurrentUserInfo() {
+            try {
+                const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+                return {
+                    email: (userInfo.email || '').toLowerCase().trim(),
+                    role: userInfo.role || '',
+                    isAgent: userInfo.role === 'Employee'
+                };
+            } catch (error) {
+                console.error('Error getting user info:', error);
+                return { email: '', role: '', isAgent: false };
+            }
+        }
+        
+        // Week filter functions
+        function getWeekNumber(date = new Date()) {
+            const startOfYear = new Date(date.getFullYear(), 0, 1);
+            const dayOfWeek = startOfYear.getDay();
+            const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            const mondayOfWeek1 = new Date(startOfYear);
+            mondayOfWeek1.setDate(startOfYear.getDate() + daysToMonday);
+            mondayOfWeek1.setHours(0, 0, 0, 0);
+            
+            const dateDay = date.getDay();
+            const dateDaysToMonday = dateDay === 0 ? -6 : 1 - dateDay;
+            const mondayOfDateWeek = new Date(date);
+            mondayOfDateWeek.setDate(date.getDate() + dateDaysToMonday);
+            mondayOfDateWeek.setHours(0, 0, 0, 0);
+            
+            const daysSinceWeek1 = Math.floor((mondayOfDateWeek - mondayOfWeek1) / (24 * 60 * 60 * 1000));
+            const weekNumber = Math.floor(daysSinceWeek1 / 7) + 1;
+            
+            return weekNumber;
+        }
+
+        function getWeekDates(weekNumber, year) {
+            const startOfYear = new Date(year, 0, 1);
+            const dayOfWeek = startOfYear.getDay();
+            const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            const mondayOfWeek1 = new Date(startOfYear);
+            mondayOfWeek1.setDate(startOfYear.getDate() + daysToMonday);
+            
+            const weekStart = new Date(mondayOfWeek1);
+            weekStart.setDate(mondayOfWeek1.getDate() + (weekNumber - 1) * 7);
+            weekStart.setHours(0, 0, 0, 0);
+            
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            weekEnd.setHours(23, 59, 59, 999);
+            
+            return { start: weekStart, end: weekEnd };
+        }
+
+        function initializeWeekFilter() {
+            const today = new Date();
+            currentWeek = getWeekNumber(today);
+            currentWeekYear = today.getFullYear();
+            // Don't apply week filter by default - show all reversals
+            useWeekFilter = false;
+            updateWeekDisplay();
+        }
+
+        function updateWeekDisplay() {
+            const weekTextEl = document.getElementById('weekText');
+            const prevWeekBtn = document.getElementById('prevWeekBtn');
+            const nextWeekBtn = document.getElementById('nextWeekBtn');
+            const weekDisplay = document.getElementById('weekDisplay');
+            
+            if (weekTextEl) {
+                if (useWeekFilter && currentWeek !== null) {
+                    weekTextEl.textContent = `Week ${currentWeek}`;
+                } else {
+                    weekTextEl.textContent = '-';
+                }
+            }
+            
+            // Disable/enable week navigation buttons based on date range filter
+            if (prevWeekBtn) {
+                if (useWeekFilter) {
+                    prevWeekBtn.disabled = false;
+                    prevWeekBtn.style.opacity = '1';
+                    prevWeekBtn.style.cursor = 'pointer';
+                } else {
+                    prevWeekBtn.disabled = true;
+                    prevWeekBtn.style.opacity = '0.5';
+                    prevWeekBtn.style.cursor = 'not-allowed';
+                }
+            }
+            
+            if (nextWeekBtn) {
+                if (useWeekFilter) {
+                    nextWeekBtn.disabled = false;
+                    nextWeekBtn.style.opacity = '1';
+                    nextWeekBtn.style.cursor = 'pointer';
+                } else {
+                    nextWeekBtn.disabled = true;
+                    nextWeekBtn.style.opacity = '0.5';
+                    nextWeekBtn.style.cursor = 'not-allowed';
+                }
+            }
+            
+            // Update week display styling
+            if (weekDisplay) {
+                if (useWeekFilter) {
+                    weekDisplay.style.backgroundColor = 'var(--primary-color)';
+                    weekDisplay.style.color = 'var(--white)';
+                    weekDisplay.style.borderColor = 'var(--primary-color)';
+                } else {
+                    weekDisplay.style.backgroundColor = '#f3f4f6';
+                    weekDisplay.style.color = '#6b7280';
+                    weekDisplay.style.borderColor = '#e5e7eb';
+                }
+            }
+        }
+
+        function navigateWeek(direction) {
+            currentWeek += direction;
+            
+            if (currentWeek > 52) {
+                currentWeek = 1;
+                currentWeekYear += 1;
+            } else if (currentWeek < 1) {
+                currentWeek = 52;
+                currentWeekYear -= 1;
+            }
+            
+            updateWeekDisplay();
+            useWeekFilter = true; // User explicitly navigated to a week, so apply the filter
+            dateFilter.start = null;
+            dateFilter.end = null;
+            const startDateEl = document.getElementById('startDate');
+            const endDateEl = document.getElementById('endDate');
+            const dateBtnTextEl = document.getElementById('dateBtnText');
+            if (startDateEl) startDateEl.value = '';
+            if (endDateEl) endDateEl.value = '';
+            if (dateBtnTextEl) dateBtnTextEl.textContent = 'Date Range';
+            
+            // Clear active state of quick filter buttons when switching to week view
+            const quickDateButtons = document.querySelectorAll('.quick-date-btn');
+            quickDateButtons.forEach(btn => btn.classList.remove('active'));
+            
+            filterReversals();
+        }
+
+        window.applyDateFilter = function() {
+            const startDateEl = document.getElementById('startDate');
+            const endDateEl = document.getElementById('endDate');
+            const startDate = startDateEl?.value || '';
+            const endDate = endDateEl?.value || '';
+            
+            if (startDate) dateFilter.start = startDate;
+            if (endDate) dateFilter.end = endDate;
+
+            const dateBtnTextEl = document.getElementById('dateBtnText');
+            if (startDate || endDate) {
+                const start = startDate ? new Date(startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Start';
+                const end = endDate ? new Date(endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'End';
+                if (dateBtnTextEl) dateBtnTextEl.textContent = `${start} - ${end}`;
+                useWeekFilter = false;
+                
+                // Clear active state of quick filter buttons when using custom date range
+                const quickDateButtons = document.querySelectorAll('.quick-date-btn');
+                quickDateButtons.forEach(btn => btn.classList.remove('active'));
+                
+                updateWeekDisplay(); // Update week display to show "-"
+            } else {
+                if (dateBtnTextEl) dateBtnTextEl.textContent = 'Date Range';
+                useWeekFilter = false; // Clear date filter means show all, not filter by current week
+                updateWeekDisplay(); // Update week display to show week number
+            }
+
+            const dateDropdown = document.getElementById('dateDropdown');
+            if (dateDropdown) dateDropdown.classList.remove('active');
+            filterReversals();
+        };
+
+        window.clearDateFilter = function() {
+            dateFilter.start = null;
+            dateFilter.end = null;
+            const startDateEl = document.getElementById('startDate');
+            const endDateEl = document.getElementById('endDate');
+            const dateBtnTextEl = document.getElementById('dateBtnText');
+            const dateDropdown = document.getElementById('dateDropdown');
+            if (startDateEl) startDateEl.value = '';
+            if (endDateEl) endDateEl.value = '';
+            if (dateBtnTextEl) dateBtnTextEl.textContent = 'Date Range';
+            if (dateDropdown) dateDropdown.classList.remove('active');
+            useWeekFilter = false; // Clear date filter means show all, not filter by current week
+            
+            // Clear active state of quick filter buttons
+            const quickDateButtons = document.querySelectorAll('.quick-date-btn');
+            quickDateButtons.forEach(btn => btn.classList.remove('active'));
+            
+            updateWeekDisplay(); // Update week display to show week number
+            filterReversals();
+        };
+
+        // Use shared date filter utility - wrap to provide page-specific callbacks
+        const originalApplyQuickDateFilter = window.applyQuickDateFilter;
+        window.applyQuickDateFilter = function(period) {
+            originalApplyQuickDateFilter(period, {
+                dateFilter: dateFilter,
+                setUseWeekFilter: () => { useWeekFilter = false; },
+                onUpdate: updateWeekDisplay,
+                onRefresh: filterReversals
+            });
+        };
+        
+        // Load reversals from all audit tables
+        async function loadReversals(onlyPending = true) {
+            try {
+                const userInfo = getCurrentUserInfo();
+                const isAgent = userInfo.isAgent;
+                
+                const loadingMessage = onlyPending ? 'Loading pending reversals...' : 'Loading all reversals...';
+                console.log(loadingMessage, 'User role:', userInfo.role, 'Is agent:', isAgent);
+                
+                if (!window.supabaseClient) {
+                    throw new Error('Supabase client not initialized');
+                }
+                
+                // Show loading indicator
+                loadingIndicator.style.display = 'block';
+                loadingIndicator.innerHTML = `<p>${loadingMessage}</p>`;
+                reversalList.style.display = 'flex';
+                noReversalsMessage.style.display = 'none';
+                
+                await loadScorecards();
+                
+                let combinedReversals = [];
+                
+                // Load from all scorecard tables
+                for (const scorecard of allScorecards) {
+                    try {
+                        let query = window.supabaseClient
+                            .from(scorecard.table_name)
+                            .select('*')
+                            .not('reversal_requested_at', 'is', null);
+                        
+                        // For agents: Only show reversals they requested (filter by employee_email)
+                        if (isAgent && userInfo.email) {
+                            query = query.eq('employee_email', userInfo.email);
+                        }
+                        
+                        // Filter based on user role and view mode
+                        if (onlyPending) {
+                            if (isAgent) {
+                                // For agents: We already filtered by email above, so load all their reversals
+                                // We'll filter by acknowledgement status client-side
+                            } else {
+                                // For auditors: Only show unprocessed reversals (reversal_approved is null)
+                                query = query.is('reversal_approved', null);
+                            }
+                        }
+                        
+                        query = query.order('reversal_requested_at', { ascending: false });
+                        
+                        const { data, error } = await query;
+                        
+                        if (error) {
+                            console.warn(`Error loading from ${scorecard.table_name}:`, error);
+                            continue;
+                        }
+                        
+                        if (data && data.length > 0) {
+                            let filteredData = data;
+                            
+                            // For agents: Additional client-side filtering to ensure exact email match
+                            if (isAgent && userInfo.email) {
+                                filteredData = filteredData.filter(audit => {
+                                    const auditEmployeeEmail = (audit.employee_email || '').toLowerCase().trim();
+                                    return auditEmployeeEmail === userInfo.email;
+                                });
+                            }
+                            
+                            const reversalsWithScorecard = filteredData.map(audit => ({
+                                ...audit,
+                                _scorecard_id: scorecard.id,
+                                _scorecard_name: scorecard.name,
+                                _scorecard_table: scorecard.table_name
+                            }));
+                            combinedReversals = combinedReversals.concat(reversalsWithScorecard);
+                        }
+                    } catch (err) {
+                        console.warn(`Exception loading from ${scorecard.table_name}:`, err);
+                        continue;
+                    }
+                }
+                
+                // For agents: Additional filtering to ensure only their own reversals are shown
+                if (isAgent && userInfo.email) {
+                    combinedReversals = combinedReversals.filter(reversal => {
+                        const auditEmployeeEmail = (reversal.employee_email || '').toLowerCase().trim();
+                        return auditEmployeeEmail === userInfo.email;
+                    });
+                }
+                
+                // Filter reversals based on user role if loading pending
+                if (onlyPending && isAgent) {
+                    // For agents: Filter to show only reversals that need acknowledgement
+                    combinedReversals = combinedReversals.filter(reversal => {
+                        const acknowledgementStatus = reversal.acknowledgement_status || reversal.acknowledgementStatus || '';
+                        const isAcknowledged = acknowledgementStatus && (
+                            acknowledgementStatus.toLowerCase().includes('acknowledged') || 
+                            acknowledgementStatus === 'Acknowledged'
+                        );
+                        
+                        // Show if:
+                        // 1. Not approved yet (pending) AND not acknowledged
+                        // 2. Approved but not acknowledged
+                        // 3. Rejected but not acknowledged
+                        const isPending = reversal.reversal_approved === null;
+                        const isApproved = reversal.reversal_approved === true || reversal.reversal_approved === 'true' || reversal.reversal_approved === 1 || reversal.reversal_approved === '1';
+                        const isRejected = reversal.reversal_approved === false || reversal.reversal_approved === 'false' || reversal.reversal_approved === 0 || reversal.reversal_approved === '0';
+                        
+                        return !isAcknowledged && (isPending || isApproved || isRejected);
+                    });
+                }
+                
+                // Apply submission date filter (week or date range) - filter by submitted_at
+                // Only apply date/week filtering if explicitly set by user
+                let dateFilteredReversals = combinedReversals;
+                if (dateFilter.start || dateFilter.end) {
+                    useWeekFilter = false;
+                    dateFilteredReversals = dateFilteredReversals.filter(r => {
+                        const submitted = new Date(r.submitted_at || r.submittedAt || r.reversal_requested_at);
+                        if (dateFilter.start && submitted < new Date(dateFilter.start)) return false;
+                        if (dateFilter.end) {
+                            const endDate = new Date(dateFilter.end);
+                            endDate.setHours(23, 59, 59, 999);
+                            if (submitted > endDate) return false;
+                        }
+                        return true;
+                    });
+                } else if (useWeekFilter && currentWeek !== null) {
+                    // Only apply week filter if user explicitly navigated to a week
+                    const weekDates = getWeekDates(currentWeek, currentWeekYear);
+                    dateFilteredReversals = dateFilteredReversals.filter(r => {
+                        const submitted = new Date(r.submitted_at || r.submittedAt || r.reversal_requested_at);
+                        return submitted >= weekDates.start && submitted <= weekDates.end;
+                    });
+                }
+                // If useWeekFilter is false and no date filter, show all reversals (no date filtering)
+                
+                // Sort by reversal request date descending
+                dateFilteredReversals.sort((a, b) => {
+                    const dateA = new Date(a.reversal_requested_at);
+                    const dateB = new Date(b.reversal_requested_at);
+                    return dateB - dateA;
+                });
+                
+                console.log(`Total reversals loaded: ${dateFilteredReversals.length} (${onlyPending ? 'pending only' : 'all'})`);
+                
+                // Update the appropriate array based on what we loaded
+                if (onlyPending) {
+                    // Merge with existing allReversals if we have them, but prioritize new pending data
+                    const existingNonPending = allReversals.filter(r => {
+                        const status = r.reversal_status || 
+                                      (r.reversal_approved === null ? 'Pending' : 
+                                       (r.reversal_approved ? 'Approved' : 'Rejected'));
+                        return status !== 'Pending';
+                    });
+                    allReversals = [...dateFilteredReversals, ...existingNonPending];
+                    pendingReversalsLoaded = true;
+                } else {
+                    allReversals = dateFilteredReversals;
+                    allReversalsLoaded = true;
+                }
+                
+                // For agents: Ensure only their own reversals are shown (additional safety check)
+                let reversalsForFiltering = allReversals;
+                if (isAgent && userInfo.email) {
+                    reversalsForFiltering = allReversals.filter(reversal => {
+                        const auditEmployeeEmail = (reversal.employee_email || '').toLowerCase().trim();
+                        return auditEmployeeEmail === userInfo.email;
+                    });
+                }
+                
+                // Update filtered reversals based on current view mode and user role
+                if (viewingAll) {
+                    filteredReversals = [...reversalsForFiltering];
+                } else {
+                    // Filter based on user role
+                    if (isAgent) {
+                        // For agents: Show reversals that need acknowledgement (already filtered to their own)
+                        filteredReversals = reversalsForFiltering.filter(reversal => {
+                            const acknowledgementStatus = reversal.acknowledgement_status || reversal.acknowledgementStatus || '';
+                            const isAcknowledged = acknowledgementStatus && (
+                                acknowledgementStatus.toLowerCase().includes('acknowledged') || 
+                                acknowledgementStatus === 'Acknowledged'
+                            );
+                            
+                            const isPending = reversal.reversal_approved === null;
+                            const isApproved = reversal.reversal_approved === true || reversal.reversal_approved === 'true' || reversal.reversal_approved === 1 || reversal.reversal_approved === '1';
+                            const isRejected = reversal.reversal_approved === false || reversal.reversal_approved === 'false' || reversal.reversal_approved === 0 || reversal.reversal_approved === '0';
+                            
+                            return !isAcknowledged && (isPending || isApproved || isRejected);
+                        });
+                    } else {
+                        // For auditors: Only show unprocessed reversals (pending)
+                        const getStatus = (r) => r.reversal_status || 
+                                            (r.reversal_approved === null ? 'Pending' : 
+                                             (r.reversal_approved ? 'Approved' : 'Rejected'));
+                        filteredReversals = reversalsForFiltering.filter(r => getStatus(r) === 'Pending');
+                    }
+                }
+                
+                updateStatistics();
+                renderReversals();
+            } catch (error) {
+                console.error('Error loading reversals:', error);
+                loadingIndicator.style.display = 'none';
+                noReversalsMessage.style.display = 'block';
+            }
+        }
+        
+        // Update statistics - use filteredReversals to respect week/date filter
+        function updateStatistics() {
+            // Use reversal_status with fallback to reversal_approved for backward compatibility
+            const getStatus = (r) => r.reversal_status || 
+                                    (r.reversal_approved === null ? 'Pending' : 
+                                     (r.reversal_approved ? 'Approved' : 'Rejected'));
+            
+            // Use filteredReversals which already respects week/date filter
+            const reversalsForStats = filteredReversals;
+            
+            const total = reversalsForStats.length;
+            const pending = reversalsForStats.filter(r => getStatus(r) === 'Pending').length;
+            const approved = reversalsForStats.filter(r => getStatus(r) === 'Approved').length;
+            const rejected = reversalsForStats.filter(r => getStatus(r) === 'Rejected').length;
+            
+            document.getElementById('totalReversals').textContent = total;
+            document.getElementById('pendingReversals').textContent = pending;
+            document.getElementById('approvedReversals').textContent = approved;
+            document.getElementById('rejectedReversals').textContent = rejected;
+        }
+        
+        // Render reversals
+        function renderReversals() {
+            loadingIndicator.style.display = 'none';
+            
+            updateStatistics();
+            
+            if (filteredReversals.length === 0) {
+                reversalList.style.display = 'none';
+                noReversalsMessage.style.display = 'block';
+                return;
+            }
+            
+            reversalList.style.display = 'flex';
+            noReversalsMessage.style.display = 'none';
+            
+            const reversalCards = filteredReversals.map(reversal => createReversalCard(reversal));
+            reversalList.innerHTML = reversalCards.join('');
+        }
+        
+        // Helper functions
+        function getInitials(name) {
+            if (!name) return '?';
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function formatCardDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+        const now = new Date();
+            const diffMs = now - date;
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            
+            return date.toLocaleDateString();
+        }
+        
+        // Create reversal card
+        function createReversalCard(reversal) {
+            const userInfo = getCurrentUserInfo();
+            const isAgent = userInfo.isAgent;
+            const requestedDate = formatCardDate(reversal.reversal_requested_at);
+            
+            // Use reversal_status column (with fallback to reversal_approved for backward compatibility)
+            const status = reversal.reversal_status || 
+                          (reversal.reversal_approved === null ? 'Pending' : 
+                           (reversal.reversal_approved ? 'Approved' : 'Rejected'));
+            
+            let statusColor, statusBgColor, statusTextColor, statusIcon;
+            if (status === 'Pending') {
+                statusColor = '#f59e0b';
+                statusBgColor = '#fef3c7';
+                statusTextColor = '#92400e';
+                statusIcon = `<svg style="width: 0.5625rem; height: 0.5625rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>`;
+            } else if (status === 'Approved') {
+                statusColor = '#10b981';
+                statusBgColor = '#dcfce7';
+                statusTextColor = '#166534';
+                statusIcon = `<svg style="width: 0.5625rem; height: 0.5625rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>`;
+            } else if (status === 'Rejected') {
+                statusColor = '#ef4444';
+                statusBgColor = '#fee2e2';
+                statusTextColor = '#991b1b';
+                statusIcon = `<svg style="width: 0.5625rem; height: 0.5625rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>`;
+            } else if (status === 'Acknowledged') {
+                statusColor = '#3b82f6';
+                statusBgColor = '#dbeafe';
+                statusTextColor = '#1e40af';
+                statusIcon = `<svg style="width: 0.5625rem; height: 0.5625rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>`;
+            } else {
+                statusColor = '#6b7280';
+                statusBgColor = '#f3f4f6';
+                statusTextColor = '#374151';
+                statusIcon = '';
+            }
+            
+            return `
+                <div class="reversal-card" style="background: #f9fafb; border: 0.0469rem solid #e5e7eb; border-radius: 0.1875rem; padding: 0.5625rem; transition: all 0.2s ease; display: flex; justify-content: space-between; align-items: center; gap: 0.5625rem; cursor: pointer; position: relative;" 
+                     onclick="${reversal.reversal_approved === null ? `reviewAndProcessReversal('${reversal.id}', '${reversal._scorecard_table}')` : `viewReversalDetails('${reversal.id}', '${reversal._scorecard_table}')`}"
+                     onmouseenter="this.style.borderColor='#1A733E'; this.style.backgroundColor='#ffffff';"
+                     onmouseleave="this.style.borderColor='#e5e7eb'; this.style.backgroundColor='#f9fafb';">
+                    
+                    <div style="flex: 1; display: flex; align-items: center; gap: 0.5625rem; pointer-events: none;">
+                        <!-- Avatar with initials -->
+                        <div style="width: 1.875rem; height: 1.875rem; border-radius: 0.1875rem; background: ${statusColor}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.6562rem; flex-shrink: 0;">
+                            ${getInitials(reversal.employee_name || 'Unknown')}
+                        </div>
+                        
+                        <!-- Employee info -->
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="display: flex; align-items: center; gap: 0.375rem; margin-bottom: 0.1875rem; flex-wrap: wrap;">
+                                <h4 style="margin: 0; font-size: 0.6562rem; font-weight: 600; color: #1f2937;">
+                                    ${escapeHtml(reversal.employee_name || 'Unknown Employee')}
+                                </h4>
+                                ${reversal._scorecard_name ? `
+                                    <span style="background-color: #f3f4f6; color: #374151; padding: 0.0938rem 0.375rem; border-radius: 0.1875rem; font-size: 0.4688rem; font-weight: 600; border: 0.0469rem solid #d1d5db;">
+                                        ${escapeHtml(reversal._scorecard_name)}
+                                    </span>
+                                ` : ''}
+                                ${reversal.reversal_type ? `
+                                    <span style="background-color: #ede9fe; color: #6b21a8; padding: 0.0938rem 0.375rem; border-radius: 0.1875rem; font-size: 0.4688rem; font-weight: 600;">
+                                        ${escapeHtml(reversal.reversal_type)}
+                                    </span>
+                                ` : ''}
+                                <span style="background-color: ${statusBgColor}; color: ${statusTextColor}; padding: 0.0938rem 0.375rem; border-radius: 0.1875rem; font-size: 0.5156rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.1875rem;">
+                                    ${statusIcon} ${status}
+                                </span>
+                            </div>
+                            <p style="margin: 0; font-size: 0.5625rem; color: #6b7280; display: flex; align-items: center; gap: 0.2812rem; flex-wrap: wrap;">
+                                <span>${escapeHtml(reversal.interaction_id || 'No ID')}</span>
+                                <span style="color: #d1d5db;">•</span>
+                                <span style="font-weight: 500;">${reversal.score_before_appeal || reversal.average_score || '0'}%</span>
+                                <span style="color: #d1d5db;">•</span>
+                                <span>${escapeHtml(reversal.reversal_reason || 'No reason provided')}</span>
+                                ${!isAgent ? `<span style="color: #d1d5db;">•</span>
+                                <span style="color: #374151; font-weight: 500;">${escapeHtml(reversal.auditor_name || 'Unknown auditor')}</span>` : ''}
+                                <span style="color: #d1d5db;">•</span>
+                                <span>${requestedDate}</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Action buttons -->
+                    <div style="display: flex; gap: 0.375rem; flex-shrink: 0; align-items: center; pointer-events: auto;">
+                        ${reversal.reversal_approved === null ? `
+                            <button 
+                                onclick="event.stopPropagation(); reviewAndProcessReversal('${reversal.id}', '${reversal._scorecard_table}')"
+                                style="padding: 0.375rem 0.75rem; background-color: #1A733E; color: white; border: none; border-radius: 0.1875rem; font-size: 0.5625rem; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;"
+                                onmouseover="this.style.backgroundColor='#15582E'"
+                                onmouseout="this.style.backgroundColor='#1A733E'"
+                            >
+                                Review & Process
+                            </button>
+                        ` : `
+                            <button 
+                                onclick="event.stopPropagation(); viewReversalDetails('${reversal.id}', '${reversal._scorecard_table}')"
+                                style="padding: 0.375rem 0.75rem; background-color: #1A733E; color: white; border: none; border-radius: 0.1875rem; font-size: 0.5625rem; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;"
+                                onmouseover="this.style.backgroundColor='#15582E'"
+                                onmouseout="this.style.backgroundColor='#1A733E'"
+                            >
+                                View Details
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Toggle filters
+        window.toggleFilters = function() {
+            const panel = document.getElementById('filterPanel');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+            } else {
+                panel.style.display = 'none';
+            }
+        };
+        
+        // Toggle between viewing all reversals and pending only
+        window.toggleViewAll = async function() {
+            const viewAllBtn = document.getElementById('viewAllBtn');
+            const userInfo = getCurrentUserInfo();
+            const isAgent = userInfo.isAgent;
+            
+            if (viewingAll) {
+                // Switch to pending only view
+                viewingAll = false;
+                viewAllBtn.textContent = 'View All';
+                viewAllBtn.style.backgroundColor = '#6b7280';
+                
+                // For agents: Ensure only their own reversals are shown
+                let reversalsForFiltering = allReversals;
+                if (isAgent && userInfo.email) {
+                    reversalsForFiltering = allReversals.filter(reversal => {
+                        const auditEmployeeEmail = (reversal.employee_email || '').toLowerCase().trim();
+                        return auditEmployeeEmail === userInfo.email;
+                    });
+                }
+                
+                // Filter based on user role
+                if (isAgent) {
+                    // For agents: Show reversals that need acknowledgement (already filtered to their own)
+                    filteredReversals = reversalsForFiltering.filter(reversal => {
+                        const acknowledgementStatus = reversal.acknowledgement_status || reversal.acknowledgementStatus || '';
+                        const isAcknowledged = acknowledgementStatus && (
+                            acknowledgementStatus.toLowerCase().includes('acknowledged') || 
+                            acknowledgementStatus === 'Acknowledged'
+                        );
+                        
+                        const isPending = reversal.reversal_approved === null;
+                        const isApproved = reversal.reversal_approved === true || reversal.reversal_approved === 'true' || reversal.reversal_approved === 1 || reversal.reversal_approved === '1';
+                        const isRejected = reversal.reversal_approved === false || reversal.reversal_approved === 'false' || reversal.reversal_approved === 0 || reversal.reversal_approved === '0';
+                        
+                        return !isAcknowledged && (isPending || isApproved || isRejected);
+                    });
+                } else {
+                    // For auditors: Only show unprocessed reversals (pending)
+                    const getStatus = (r) => r.reversal_status || 
+                                        (r.reversal_approved === null ? 'Pending' : 
+                                         (r.reversal_approved ? 'Approved' : 'Rejected'));
+                    filteredReversals = reversalsForFiltering.filter(r => getStatus(r) === 'Pending');
+                }
+                
+                // Clear filters that might conflict
+                if (statusFilter) statusFilter.value = '';
+                if (searchInput) searchInput.value = '';
+                if (typeFilter) typeFilter.value = '';
+                const dateFromFilter = document.getElementById('dateFromFilter');
+                const dateToFilter = document.getElementById('dateToFilter');
+                if (dateFromFilter) dateFromFilter.value = '';
+                if (dateToFilter) dateToFilter.value = '';
+            } else {
+                // Switch to view all
+                viewingAll = true;
+                viewAllBtn.textContent = 'Show Pending Only';
+                viewAllBtn.style.backgroundColor = '#1A733E';
+                
+                // Load all reversals if not already loaded
+                if (!allReversalsLoaded) {
+                    await loadReversals(false);
+                    return; // loadReversals will call renderReversals
+                }
+                
+                // For agents: Ensure only their own reversals are shown
+                if (isAgent && userInfo.email) {
+                    filteredReversals = allReversals.filter(reversal => {
+                        const auditEmployeeEmail = (reversal.employee_email || '').toLowerCase().trim();
+                        return auditEmployeeEmail === userInfo.email;
+                    });
+                } else {
+                    // Show all reversals for auditors
+                    filteredReversals = [...allReversals];
+                }
+            }
+            
+            updateStatistics();
+            renderReversals();
+        };
+        
+        // Filter reversals
+        function filterReversals() {
+            const userInfo = getCurrentUserInfo();
+            const isAgent = userInfo.isAgent;
+            const searchTerm = (searchInput?.value || '').toLowerCase();
+            const statusValue = statusFilter?.value || '';
+            const typeValue = typeFilter?.value || '';
+            const dateFrom = document.getElementById('dateFromFilter')?.value || '';
+            const dateTo = document.getElementById('dateToFilter')?.value || '';
+            
+            // For agents: First filter to only their own reversals
+            let reversalsForFiltering = allReversals;
+            if (isAgent && userInfo.email) {
+                reversalsForFiltering = allReversals.filter(reversal => {
+                    const auditEmployeeEmail = (reversal.employee_email || '').toLowerCase().trim();
+                    return auditEmployeeEmail === userInfo.email;
+                });
+            }
+            
+            // Start with the appropriate base set
+            let baseReversals = viewingAll ? reversalsForFiltering : (isAgent ? 
+                // For agents: Show reversals that need acknowledgement (already filtered to their own)
+                reversalsForFiltering.filter(reversal => {
+                    const acknowledgementStatus = reversal.acknowledgement_status || reversal.acknowledgementStatus || '';
+                    const isAcknowledged = acknowledgementStatus && (
+                        acknowledgementStatus.toLowerCase().includes('acknowledged') || 
+                        acknowledgementStatus === 'Acknowledged'
+                    );
+                    
+                    const isPending = reversal.reversal_approved === null;
+                    const isApproved = reversal.reversal_approved === true || reversal.reversal_approved === 'true' || reversal.reversal_approved === 1 || reversal.reversal_approved === '1';
+                    const isRejected = reversal.reversal_approved === false || reversal.reversal_approved === 'false' || reversal.reversal_approved === 0 || reversal.reversal_approved === '0';
+                    
+                    return !isAcknowledged && (isPending || isApproved || isRejected);
+                }) :
+                // For auditors: Only show unprocessed reversals (pending)
+                reversalsForFiltering.filter(r => {
+                    const getStatus = (r) => r.reversal_status || 
+                                        (r.reversal_approved === null ? 'Pending' : 
+                                         (r.reversal_approved ? 'Approved' : 'Rejected'));
+                    return getStatus(r) === 'Pending';
+                })
+            );
+            
+            // If viewing all is false and we need to load all for filtering, prompt user
+            if (!viewingAll && (statusValue === 'approved' || statusValue === 'rejected')) {
+                // If filtering by approved/rejected while in pending view, we need all data
+                if (!allReversalsLoaded) {
+                    alert('Please click "View All" to filter by approved or rejected reversals.');
+                    if (statusFilter) statusFilter.value = '';
+                    return;
+                }
+                // For agents: Still filter to their own reversals
+                if (isAgent && userInfo.email) {
+                    baseReversals = allReversals.filter(reversal => {
+                        const auditEmployeeEmail = (reversal.employee_email || '').toLowerCase().trim();
+                        return auditEmployeeEmail === userInfo.email;
+                    });
+                } else {
+                    baseReversals = allReversals;
+                }
+            }
+            
+            filteredReversals = baseReversals.filter(reversal => {
+                // Search filter
+                const matchesSearch = !searchTerm || 
+                    (reversal.employee_name && reversal.employee_name.toLowerCase().includes(searchTerm)) ||
+                    (reversal.interaction_id && reversal.interaction_id.toLowerCase().includes(searchTerm)) ||
+                    (reversal.reversal_reason && reversal.reversal_reason.toLowerCase().includes(searchTerm));
+                
+                // Status filter
+                const getStatus = (r) => r.reversal_status || 
+                                    (r.reversal_approved === null ? 'Pending' : 
+                                     (r.reversal_approved ? 'Approved' : 'Rejected'));
+                
+                let matchesStatus = true;
+                if (statusValue === 'pending') {
+                    matchesStatus = getStatus(reversal) === 'Pending';
+                } else if (statusValue === 'approved') {
+                    matchesStatus = getStatus(reversal) === 'Approved';
+                } else if (statusValue === 'rejected') {
+                    matchesStatus = getStatus(reversal) === 'Rejected';
+                }
+                
+                // Type filter
+                const matchesType = !typeValue || reversal.reversal_type === typeValue;
+                
+                // Date range filter - use submission date (submitted_at) for filtering
+                let matchesDateRange = true;
+                // First apply week/date filter from header controls (only if explicitly set)
+                if (dateFilter.start || dateFilter.end) {
+                    const submitted = new Date(reversal.submitted_at || reversal.submittedAt || reversal.reversal_requested_at);
+                    if (dateFilter.start && submitted < new Date(dateFilter.start)) matchesDateRange = false;
+                    if (dateFilter.end) {
+                        const endDate = new Date(dateFilter.end);
+                        endDate.setHours(23, 59, 59, 999);
+                        if (submitted > endDate) matchesDateRange = false;
+                    }
+                } else if (useWeekFilter && currentWeek !== null) {
+                    // Only apply week filter if user explicitly navigated to a week
+                    const weekDates = getWeekDates(currentWeek, currentWeekYear);
+                    const submitted = new Date(reversal.submitted_at || reversal.submittedAt || reversal.reversal_requested_at);
+                    if (submitted < weekDates.start || submitted > weekDates.end) matchesDateRange = false;
+                }
+                // If useWeekFilter is false and no date filter, matchesDateRange remains true (show all)
+                // Then apply additional date range filter from filter panel if specified
+                if (matchesDateRange && (dateFrom || dateTo)) {
+                    const submitted = new Date(reversal.submitted_at || reversal.submittedAt || reversal.reversal_requested_at);
+                    if (dateFrom) {
+                        const fromDate = new Date(dateFrom);
+                        if (submitted < fromDate) matchesDateRange = false;
+                    }
+                    if (dateTo) {
+                        const toDate = new Date(dateTo);
+                        toDate.setHours(23, 59, 59, 999);
+                        if (submitted > toDate) matchesDateRange = false;
+                    }
+                }
+                
+                return matchesSearch && matchesStatus && matchesType && matchesDateRange;
+            });
+            
+            renderReversals();
+        }
+        
+        // Event listeners
+        if (searchInput) {
+            searchInput.addEventListener('input', filterReversals);
+        }
+        if (statusFilter) {
+            statusFilter.addEventListener('change', filterReversals);
+        }
+        if (typeFilter) {
+            typeFilter.addEventListener('change', filterReversals);
+        }
+        if (clearFilters) {
+            clearFilters.addEventListener('click', function() {
+                document.querySelectorAll('input[id$="Filter"], select[id$="Filter"], #searchInput').forEach(input => {
+                    input.value = '';
+                });
+                filterReversals();
+            });
+        }
+        
+        const dateFromFilter = document.getElementById('dateFromFilter');
+        const dateToFilter = document.getElementById('dateToFilter');
+        if (dateFromFilter) dateFromFilter.addEventListener('change', filterReversals);
+        if (dateToFilter) dateToFilter.addEventListener('change', filterReversals);
+        
+        // Export functionality
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            if (filteredReversals.length === 0) {
+                alert('No reversals to export.');
+                return;
+            }
+            
+            const userInfo = getCurrentUserInfo();
+            const isAgent = userInfo.isAgent;
+            
+            const headers = [
+                'ID', 'Employee Name', ...(isAgent ? [] : ['Auditor Name']), 'Score Before Appeal', 
+                'Reversal Type', 'Reversal Reason', 'Reversal Status', 'Requested At', 
+                'Responded At', 'Interaction ID', 'Scorecard'
+            ];
+            
+            const csvContent = [
+                headers.join(','),
+                ...filteredReversals.map(r => [
+                    r.id || '',
+                    r.employee_name || '',
+                    ...(isAgent ? [] : [r.auditor_name || '']),
+                    r.score_before_appeal || r.average_score || '',
+                    r.reversal_type || '',
+                    r.reversal_reason || '',
+                    r.reversal_status || (r.reversal_approved === null ? 'Pending' : (r.reversal_approved ? 'Approved' : 'Rejected')),
+                    r.reversal_requested_at || '',
+                    r.reversal_responded_at || '',
+                    r.interaction_id || '',
+                    r._scorecard_name || ''
+                ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `reversal-reports-${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+        
+        // View reversal details
+        window.viewReversalDetails = function(auditId, tableName) {
+            window.location.href = `audit-view.html?id=${auditId}&table=${tableName}`;
+        };
+        
+        // Review and process reversal - redirects to edit page
+        window.reviewAndProcessReversal = function(auditId, tableName) {
+            // Get scorecard ID from reversal data
+            const reversal = allReversals.find(r => r.id === auditId && r._scorecard_table === tableName);
+            const scorecardId = reversal?._scorecard_id || reversal?.scorecard_id || '';
+            
+            // Redirect to edit-audit.html with the audit
+            if (scorecardId) {
+                window.location.href = `edit-audit.html?id=${auditId}&scorecard=${scorecardId}&table=${tableName}`;
+            } else {
+                window.location.href = `edit-audit.html?id=${auditId}&table=${tableName}`;
+            }
+        };
+        
+        // Process reversal (kept for backward compatibility, but not used in new flow)
+        window.processReversal = async function(auditId, tableName) {
+            // Redirect to edit page instead of opening modal
+            window.reviewAndProcessReversal(auditId, tableName);
+        };
+        
+        // Show reversal processing modal
+        function showReversalProcessingModal(reversal, tableName) {
+            // Create modal
+            const modal = document.createElement('div');
+            modal.id = 'processingModal';
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.6); z-index: 1000; display: flex; 
+                align-items: center; justify-content: center; padding: 0.75rem;
+                overflow-y: auto;
+            `;
+            
+            const currentUser = JSON.parse(localStorage.getItem('user'));
+            const currentUserName = currentUser?.name || currentUser?.email || 'Unknown';
+            
+            // Get scorecard info for passing threshold
+            const scorecard = allScorecards.find(s => s.table_name === tableName);
+            const passingThreshold = scorecard?.passing_threshold || 85;
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 0.375rem; max-width: 28.125rem; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 0.7031rem 0.8789rem -0.1758rem rgba(0, 0, 0, 0.1);">
+                    <div style="background: linear-gradient(135deg, #1A733E 0%, #2d9a5a 100%); padding: 1.125rem; color: white; border-radius: 0.375rem 0.375rem 0 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <h2 style="margin: 0 0 0.375rem 0; font-size: 0.9375rem; font-weight: 700; font-family: 'Poppins', sans-serif;">Process Reversal Request</h2>
+                                <p style="margin: 0; font-size: 0.6562rem; opacity: 0.9; font-family: 'Poppins', sans-serif;">Review and respond to the reversal request</p>
+                            </div>
+                            <button onclick="document.getElementById('processingModal').remove()" style="background: rgba(255,255,255,0.2); border: 0.0703rem solid white; border-radius: 0.2812rem; width: 1.5rem; height: 1.5rem; font-size: 0.9375rem; cursor: pointer; color: white; font-weight: bold; transition: all 0.2s;">×</button>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 1.125rem;">
+                        <!-- Reversal Details -->
+                        <div style="background: #f9fafb; border-radius: 0.375rem; padding: 0.75rem; margin-bottom: 1.125rem; border: 0.0352rem solid #e5e7eb;">
+                            <h3 style="font-size: 0.6562rem; font-weight: 600; color: #1A733E; margin: 0 0 0.5625rem 0; font-family: 'Poppins', sans-serif; text-transform: uppercase;">Request Details</h3>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5625rem; font-size: 0.6094rem; font-family: 'Poppins', sans-serif;">
+                                <div>
+                                    <span style="color: #6b7280; font-weight: 500;">Employee:</span>
+                                    <span style="color: #1f2937; font-weight: 600; margin-left: 0.375rem;">${escapeHtml(reversal.employee_name || 'N/A')}</span>
+                                </div>
+                                <div>
+                                    <span style="color: #6b7280; font-weight: 500;">Auditor:</span>
+                                    <span style="color: #1f2937; font-weight: 600; margin-left: 0.375rem;">${escapeHtml(reversal.auditor_name || 'N/A')}</span>
+                                </div>
+                                <div>
+                                    <span style="color: #6b7280; font-weight: 500;">Original Score:</span>
+                                    <span style="color: #1f2937; font-weight: 600; margin-left: 0.375rem;">${reversal.score_before_appeal || reversal.average_score || '0'}%</span>
+                                </div>
+                                <div>
+                                    <span style="color: #6b7280; font-weight: 500;">Passing Threshold:</span>
+                                    <span style="color: #1f2937; font-weight: 600; margin-left: 0.375rem;">${passingThreshold}%</span>
+                                </div>
+                                <div style="grid-column: span 2;">
+                                    <span style="color: #6b7280; font-weight: 500;">Reversal Type:</span>
+                                    <span style="color: #1f2937; font-weight: 600; margin-left: 0.375rem;">${escapeHtml(reversal.reversal_type || 'N/A')}</span>
+                                </div>
+                                <div style="grid-column: span 2;">
+                                    <span style="color: #6b7280; font-weight: 500;">Reason:</span>
+                                    <span style="color: #1f2937; font-weight: 600; margin-left: 0.375rem;">${escapeHtml(reversal.reversal_reason || 'N/A')}</span>
+                                </div>
+                                <div style="grid-column: span 2;">
+                                    <span style="color: #6b7280; font-weight: 500;">Justification:</span>
+                                    <div style="margin-top: 0.375rem; padding: 0.5625rem; background: white; border-radius: 0.2812rem; border: 0.0352rem solid #e5e7eb; white-space: pre-wrap; line-height: 1.5;">${escapeHtml(reversal.reversal_justification || 'No justification provided')}</div>
+                                </div>
+                                ${reversal.reversal_metrics ? `
+                                    <div style="grid-column: span 2;">
+                                        <span style="color: #6b7280; font-weight: 500;">Affected Parameters:</span>
+                                        <div style="margin-top: 0.375rem; padding: 0.5625rem; background: white; border-radius: 0.2812rem; border: 0.0352rem solid #e5e7eb;">${escapeHtml(reversal.reversal_metrics)}</div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <!-- Processing Form -->
+                        <form id="processReversalForm" style="display: grid; gap: 0.75rem;">
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                                <!-- Decision -->
+                                <div>
+                                    <label for="reversalDecision" style="display: block; font-size: 0.6094rem; font-weight: 600; color: #374151; margin-bottom: 0.2812rem; font-family: 'Poppins', sans-serif;">
+                                        Decision <span style="color: #ef4444;">*</span>
+                                    </label>
+                                    <select id="reversalDecision" required style="width: 100%; padding: 0.375rem; border: 0.0352rem solid #d1d5db; border-radius: 0.2812rem; font-size: 0.6094rem; font-family: 'Poppins', sans-serif;">
+                                        <option value="">Select decision...</option>
+                                        <option value="approved">Approve Reversal</option>
+                                        <option value="rejected">Reject Reversal</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Score After Appeal -->
+                                <div>
+                                    <label for="scoreAfterAppeal" style="display: block; font-size: 0.6094rem; font-weight: 600; color: #374151; margin-bottom: 0.2812rem; font-family: 'Poppins', sans-serif;">
+                                        Score After Appeal <span style="color: #ef4444;">*</span>
+                                    </label>
+                                    <input type="number" id="scoreAfterAppeal" min="0" max="100" step="0.01" value="${reversal.score_before_appeal || reversal.average_score || 0}" required style="width: 100%; padding: 0.375rem; border: 0.0352rem solid #d1d5db; border-radius: 0.2812rem; font-size: 0.6094rem; font-family: 'Poppins', sans-serif;">
+                                    <span id="passingStatusIndicator" style="font-size: 0.5625rem; margin-top: 0.1875rem; display: block; font-family: 'Poppins', sans-serif;"></span>
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                                <!-- Approved By -->
+                                <div>
+                                    <label for="approvedBy" style="display: block; font-size: 0.6094rem; font-weight: 600; color: #374151; margin-bottom: 0.2812rem; font-family: 'Poppins', sans-serif;">
+                                        Approved By (Supervisor)
+                                    </label>
+                                    <input type="text" id="approvedBy" placeholder="Supervisor name..." style="width: 100%; padding: 0.375rem; border: 0.0352rem solid #d1d5db; border-radius: 0.2812rem; font-size: 0.6094rem; font-family: 'Poppins', sans-serif;">
+                                </div>
+                                
+                                <!-- Resolved By -->
+                                <div>
+                                    <label for="resolvedBy" style="display: block; font-size: 0.6094rem; font-weight: 600; color: #374151; margin-bottom: 0.2812rem; font-family: 'Poppins', sans-serif;">
+                                        Resolved By
+                                    </label>
+                                    <input type="text" id="resolvedBy" value="${escapeHtml(currentUserName)}" style="width: 100%; padding: 0.375rem; border: 0.0352rem solid #d1d5db; border-radius: 0.2812rem; font-size: 0.6094rem; font-family: 'Poppins', sans-serif;">
+                                </div>
+                            </div>
+                            
+                            <!-- Response Delay Reason -->
+                            <div>
+                                <label for="delayReason" style="display: block; font-size: 0.6094rem; font-weight: 600; color: #374151; margin-bottom: 0.2812rem; font-family: 'Poppins', sans-serif;">
+                                    Response Delay Reason (if applicable)
+                                </label>
+                                <textarea id="delayReason" rows="2" placeholder="Explain if response took longer than expected..." style="width: 100%; padding: 0.375rem; border: 0.0352rem solid #d1d5db; border-radius: 0.2812rem; font-size: 0.6094rem; font-family: 'Poppins', sans-serif; resize: vertical;"></textarea>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div style="display: flex; gap: 0.5625rem; justify-content: flex-end; padding-top: 0.375rem; border-top: 0.0352rem solid #e5e7eb;">
+                                <button type="button" onclick="document.getElementById('processingModal').remove()" style="padding: 0.4688rem 0.9375rem; background-color: #f3f4f6; color: #374151; border: 0.0352rem solid #d1d5db; border-radius: 0.2812rem; font-size: 0.6562rem; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">
+                                    Cancel
+                                </button>
+                                <button type="submit" style="padding: 0.4688rem 0.9375rem; background-color: #1A733E; color: white; border: none; border-radius: 0.2812rem; font-size: 0.6562rem; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">
+                                    Submit Decision
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Update passing status indicator when score changes
+            const scoreInput = document.getElementById('scoreAfterAppeal');
+            const statusIndicator = document.getElementById('passingStatusIndicator');
+            
+            function updatePassingStatus() {
+                const score = parseFloat(scoreInput.value) || 0;
+                if (score >= passingThreshold) {
+                    statusIndicator.textContent = '✓ Score will result in PASSING';
+                    statusIndicator.style.color = '#10b981';
+                } else {
+                    statusIndicator.textContent = '✗ Score will result in NOT PASSING';
+                    statusIndicator.style.color = '#ef4444';
+                }
+            }
+            
+            scoreInput.addEventListener('input', updatePassingStatus);
+            updatePassingStatus();
+            
+            // Handle form submission
+            document.getElementById('processReversalForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+                const decision = document.getElementById('reversalDecision').value;
+                const scoreAfterAppeal = parseFloat(document.getElementById('scoreAfterAppeal').value);
+                const approvedBy = document.getElementById('approvedBy').value;
+                const resolvedBy = document.getElementById('resolvedBy').value;
+                const delayReason = document.getElementById('delayReason').value;
+                
+                // Calculate SLA hours (time between request and now)
+                const requestedAt = new Date(reversal.reversal_requested_at);
+                const respondedAt = new Date();
+                const slaHours = ((respondedAt - requestedAt) / (1000 * 60 * 60)).toFixed(2);
+                
+                // Determine if passing
+                const passedAfterAppeal = scoreAfterAppeal >= passingThreshold;
+                
+                // Prepare update data
+                const updateData = {
+                    reversal_status: decision === 'approved' ? 'Approved' : 'Rejected',
+                    reversal_approved: decision === 'approved',
+                    reversal_responded_at: respondedAt.toISOString(),
+                    reversal_sla_hours: parseFloat(slaHours),
+                    reversal_response_delay_reason: delayReason || null,
+                    reversal_approved_by: approvedBy || null,
+                    reversal_resolved_by: resolvedBy || null,
+                    score_after_appeal: scoreAfterAppeal,
+                    passed_after_appeal: passedAfterAppeal
+                };
+                
+                // If approved, update the actual audit score and passing status
+                if (decision === 'approved') {
+                    updateData.average_score = scoreAfterAppeal;
+                    updateData.passing_status = passedAfterAppeal ? 'Passing' : 'Not Passing';
+                }
+                
+                try {
+                    const { data, error } = await window.supabaseClient
+                        .from(tableName)
+                        .update(updateData)
+                        .eq('id', reversal.id)
+                        .select();
+                    
+                    if (error) throw error;
+                    
+                    alert('✓ Reversal processed successfully!');
+                    
+                    // Close modal and reload data based on current view mode
+                    document.getElementById('processingModal').remove();
+                    // Reload pending if in pending view, or reload all if in all view
+                    if (viewingAll && allReversalsLoaded) {
+                        loadReversals(false);
+                    } else {
+                        loadReversals(true);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error processing reversal:', error);
+                    alert('Failed to process reversal. Please try again.');
+                }
+            });
+        }
+        
+        // Setup event listeners for week navigation and date picker
+        function setupHeaderActionListeners() {
+            // Week navigation buttons
+            const prevWeekBtn = document.getElementById('prevWeekBtn');
+            const nextWeekBtn = document.getElementById('nextWeekBtn');
+            if (prevWeekBtn) {
+                prevWeekBtn.addEventListener('click', () => navigateWeek(-1));
+            }
+            if (nextWeekBtn) {
+                nextWeekBtn.addEventListener('click', () => navigateWeek(1));
+            }
+
+            // Date button
+            const dateBtn = document.getElementById('dateBtn');
+            if (dateBtn) {
+                dateBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const dropdown = document.getElementById('dateDropdown');
+                    if (dropdown) dropdown.classList.toggle('active');
+                });
+            }
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.date-picker-dropdown')) {
+                    const dropdown = document.getElementById('dateDropdown');
+                    if (dropdown) dropdown.classList.remove('active');
+                }
+            });
+        }
+        
+        // Setup listeners when DOM is ready
+        setupHeaderActionListeners();
+        
+        // Initialize week filter
+        initializeWeekFilter();
+        
+        // Initialize month filter and activate "This Month" button
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const firstDayStr = firstDay.toISOString().split('T')[0];
+        const lastDay = new Date(year, month + 1, 0);
+        const lastDayStr = lastDay.toISOString().split('T')[0];
+        
+        dateFilter.start = firstDayStr;
+        dateFilter.end = lastDayStr;
+        useWeekFilter = false;
+        
+        const startDateEl = document.getElementById('startDate');
+        const endDateEl = document.getElementById('endDate');
+        const dateBtnTextEl = document.getElementById('dateBtnText');
+        
+        if (startDateEl) startDateEl.value = firstDayStr;
+        if (endDateEl) endDateEl.value = lastDayStr;
+        
+        if (dateBtnTextEl) {
+            const start = firstDay.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const end = lastDay.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            dateBtnTextEl.textContent = `${start} - ${end}`;
+        }
+        
+        // Activate "This Month" button
+        const quickDateButtons = document.querySelectorAll('.quick-date-btn');
+        quickDateButtons.forEach(btn => btn.classList.remove('active'));
+        const thisMonthBtn = document.getElementById('thisMonthBtn');
+        if (thisMonthBtn) {
+            thisMonthBtn.classList.add('active');
+        }
+        
+        // Initialize - load only pending reversals by default
+        loadReversals(true);
+        
+    } catch (error) {
+        console.error('Error in reversal management functionality:', error);
+    }
+});
+</script>
+
+</body>
+</html>

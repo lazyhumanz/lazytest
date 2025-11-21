@@ -1,0 +1,7 @@
+{
+  "buildCommand": "npm run build:config",
+  "outputDirectory": ".",
+  "framework": null,
+  "installCommand": "npm install"
+}
+

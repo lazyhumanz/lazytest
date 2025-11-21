@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Search | QMS</title>
+<meta name="description" content="Search Quality Management System">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAtOTYwIDk2MCA5NjAiIHdpZHRoPSIyNHB4IiBmaWxsPSIjMWY5ZTRiIj48cGF0aCBkPSJNMjAwLTEyMHEtMzMgMC01Ni41LTIzLjVUMTIwLTIwMHYtNTYwcTAtMzMgMjMuNS01Ni41VDIwMC04NDBoNTYwcTMzIDAgNTYuNSAyMy41VDg0MC03NjB2NTYwcTAgMzMtMjMuNSA1Ni41VDc2MC0xMjBIMjAwWm00OTEtODBoNjl2LTY5bC02OSA2OVptLTQ1NyAwaDczbDEyMC0xMjBoODVMNDUyLTIwMGg2NGwxMjAtMTIwaDg1TDU0MS0yMDBoNjVsMTIwLTEyMGgzNHYtNDQwSDIwMHY1MDlsNjktNjloODVMNDM0LTIwMFptNzItMjAwLTU2LTU2IDE3Ny0xNzcgODAgODAgMTQ3LTE0NyA1NiA1Ni0yMDMgMjA0LTgwLTgwLTEyMSAxMjBaIi8+PC9zdmc+">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="sidebar.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="env-config.js"></script>
+    <script src="supabase-config.js"></script>
+    <script src="auth-check.js"></script>
+    <script src="confirmation-dialog.js"></script>
+    <script src="load-sidebar.js"></script>
+    <script src="search.js"></script>
+    <script src="form-validation.js"></script>
+    <script src="keyboard-shortcuts.js"></script>
+    <style>
+        /* Search Page Specific Styles */
+        .search-page-container {
+            max-width: 42.1875rem;
+            margin: 0 auto;
+            padding: 1.5rem 0.75rem;
+        }
+
+        .search-header {
+            text-align: center;
+            margin-bottom: 2.25rem;
+        }
+
+        .search-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.375rem;
+        }
+
+        .search-subtitle {
+            font-size: 0.8438rem;
+            color: var(--gray-600);
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input-container {
+            position: relative;
+            max-width: 21.0938rem;
+            margin: 0 auto 1.5rem;
+        }
+
+        .search-input-large {
+            width: 100%;
+            padding: 0.9375rem 1.125rem;
+            font-size: 0.8438rem;
+            border: 0.0703rem solid var(--border-light);
+            border-radius: 0.75rem;
+            background: var(--white);
+            box-shadow: 0 0.1406rem 0.2109rem -0.0352rem rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .search-input-large:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.1055rem rgba(26, 115, 62, 0.1);
+        }
+
+        .search-input-large::placeholder {
+            color: var(--gray-400);
+        }
+
+        .search-btn-large {
+            position: absolute;
+            right: 0.375rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 0.5625rem;
+            padding: 0.5625rem 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .search-btn-large:hover {
+            background: var(--primary-dark);
+            transform: translateY(-50%) scale(1.02);
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.375rem 0.75rem;
+            border: 0.0352rem solid var(--border-light);
+            border-radius: 0.375rem;
+            background: var(--white);
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.6562rem;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+        }
+
+        .search-results-container {
+            margin-top: 1.5rem;
+        }
+
+        .search-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.125rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 0.0352rem solid var(--border-light);
+        }
+
+        .results-count {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            font-weight: 500;
+        }
+
+        .results-sort {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .sort-select {
+            padding: 0.375rem;
+            border: 0.0352rem solid var(--border-light);
+            border-radius: 0.2812rem;
+            background: var(--white);
+            color: var(--gray-700);
+            font-size: 0.6562rem;
+        }
+
+        .search-results-grid {
+            display: grid;
+            gap: 1.125rem;
+            grid-template-columns: repeat(auto-fill, minmax(12.3046rem, 1fr));
+        }
+
+        .search-result-card {
+            background: var(--white);
+            border: 0.0352rem solid var(--border-light);
+            border-radius: 0.75rem;
+            padding: 1.125rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-result-card:hover {
+            transform: translateY(-0.0703rem);
+            box-shadow: 0 0.3516rem 0.8789rem -0.1758rem rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .search-result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 0.1406rem;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .search-result-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .result-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .result-card-icon {
+            width: 2.25rem;
+            height: 2.25rem;
+            background: linear-gradient(135deg, rgba(26, 115, 62, 0.1), rgba(26, 115, 62, 0.05));
+            border-radius: 0.5625rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            flex-shrink: 0;
+        }
+
+        .result-card-icon svg {
+            width: 1.125rem;
+            height: 1.125rem;
+        }
+
+        .result-card-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .result-card-title {
+            font-size: 0.8438rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.375rem;
+            line-height: 1.4;
+        }
+
+        .result-card-type {
+            display: inline-block;
+            background: rgba(26, 115, 62, 0.1);
+            color: var(--primary-color);
+            padding: 0.1875rem 0.5625rem;
+            border-radius: 0.75rem;
+            font-size: 0.5625rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5625rem;
+        }
+
+        .result-card-description {
+            color: var(--gray-600);
+            font-size: 0.6562rem;
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+        }
+
+        .result-card-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.375rem;
+        }
+
+        .result-keyword {
+            background: rgba(26, 115, 62, 0.1);
+            color: var(--primary-color);
+            padding: 0.1875rem 0.375rem;
+            border-radius: 0.2812rem;
+            font-size: 0.5625rem;
+            font-weight: 500;
+        }
+
+        .no-results-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--gray-500);
+        }
+
+        .no-results-icon {
+            width: 3rem;
+            height: 3rem;
+            margin: 0 auto 1.125rem;
+            color: var(--gray-300);
+        }
+
+        .no-results-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-600);
+            margin-bottom: 0.375rem;
+        }
+
+        .no-results-subtitle {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-bottom: 1.5rem;
+        }
+
+        .search-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.375rem;
+            justify-content: center;
+        }
+
+        .suggestion-btn {
+            padding: 0.375rem 0.75rem;
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.6562rem;
+        }
+
+        .suggestion-btn:hover {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .loading-spinner {
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 0.1055rem solid rgba(26, 115, 62, 0.2);
+            border-top: 0.1055rem solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 0.75rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .search-stats {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.75rem;
+            background: var(--white);
+            border: 0.0352rem solid var(--border-light);
+            border-radius: 0.5625rem;
+            min-width: 4.2188rem;
+        }
+
+        .stat-number {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.1875rem;
+        }
+
+        .stat-label {
+            font-size: 0.6562rem;
+            color: var(--gray-600);
+        }
+
+        /* Quick Links Section */
+        .quick-links-section {
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title svg {
+            width: 1.125rem;
+            height: 1.125rem;
+            color: var(--primary-color);
+        }
+
+        .quick-links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quick-link-card {
+            background: var(--white);
+            border: 0.0352rem solid var(--border-light);
+            border-radius: 0.5625rem;
+            padding: 0.9375rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .quick-link-card:hover {
+            transform: translateY(-0.0703rem);
+            box-shadow: 0 0.2109rem 0.5273rem -0.1055rem rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .quick-link-icon {
+            width: 2rem;
+            height: 2rem;
+            background: linear-gradient(135deg, rgba(26, 115, 62, 0.1), rgba(26, 115, 62, 0.05));
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            flex-shrink: 0;
+        }
+
+        .quick-link-icon svg {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .quick-link-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .quick-link-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.1875rem;
+        }
+
+        .quick-link-subtitle {
+            font-size: 0.625rem;
+            color: var(--gray-500);
+        }
+
+        /* Recent Searches */
+        .recent-searches {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .recent-search-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.75rem;
+            background: var(--gray-100);
+            border: 0.0352rem solid var(--border-light);
+            border-radius: 1.125rem;
+            font-size: 0.6562rem;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .recent-search-chip:hover {
+            background: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+        }
+
+        .recent-search-chip .remove-btn {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .recent-search-chip:hover .remove-btn {
+            opacity: 1;
+        }
+
+        .recent-search-chip .remove-btn svg {
+            width: 0.75rem;
+            height: 0.75rem;
+        }
+
+        /* Keyboard Shortcuts */
+        .shortcuts-section {
+            margin-top: 2rem;
+            padding: 1.125rem;
+            background: var(--gray-50);
+            border-radius: 0.75rem;
+            border: 0.0352rem solid var(--border-light);
+        }
+
+        .shortcuts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .shortcut-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5625rem;
+            background: var(--white);
+            border-radius: 0.375rem;
+        }
+
+        .shortcut-label {
+            font-size: 0.6562rem;
+            color: var(--gray-700);
+        }
+
+        .shortcut-keys {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .key {
+            padding: 0.1875rem 0.375rem;
+            background: var(--white);
+            border: 0.0352rem solid var(--border-light);
+            border-radius: 0.2812rem;
+            font-size: 0.5625rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            box-shadow: 0 0.0703rem 0.1406rem rgba(0, 0, 0, 0.1);
+        }
+
+        /* Keyboard Navigation Highlight */
+        .search-result-card.keyboard-focused {
+            outline: 0.1406rem solid var(--primary-color);
+            outline-offset: 0.1406rem;
+            transform: translateY(-0.0703rem);
+            box-shadow: 0 0.3516rem 0.8789rem -0.1758rem rgba(0, 0, 0, 0.1);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .quick-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5625rem 1rem;
+            background: var(--white);
+            border: 0.0352rem solid var(--border-light);
+            border-radius: 0.5rem;
+            font-size: 0.6562rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-action-btn:hover {
+            background: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+        }
+
+        .quick-action-btn svg {
+            width: 0.875rem;
+            height: 0.875rem;
+        }
+
+        /* Hide sections when searching */
+        .quick-links-section.hidden,
+        .shortcuts-section.hidden,
+        .quick-actions.hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+
+<body>
+<!-- Sidebar will be loaded dynamically by load-sidebar.js -->
+ <main class="main-content" role="main">
+    <div class="search-page-container">
+        <!-- Search Header -->
+        <div class="search-header">
+            <h1 class="search-title">Search QMS</h1>
+            <p class="search-subtitle">Find pages, features, and information across the Quality Management System</p>
+            
+            <!-- Search Input -->
+            <div class="search-input-container">
+                <input type="text" id="search-input-large" class="search-input-large" placeholder="Search for pages, features, settings..." autocomplete="off">
+                <button class="search-btn-large" id="search-btn-large">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                    Search
+                </button>
+            </div>
+
+            <!-- Search Filters -->
+            <div class="search-filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="page">Pages</button>
+                <button class="filter-btn" data-filter="audit">Audits</button>
+                <button class="filter-btn" data-filter="report">Reports</button>
+                <button class="filter-btn" data-filter="dashboard">Dashboards</button>
+                <button class="filter-btn" data-filter="setting">Settings</button>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions" id="quick-actions">
+            <button class="quick-action-btn" data-action="home">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+                Home
+            </button>
+            <button class="quick-action-btn" data-action="create-audit">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+                New Audit
+            </button>
+            <button class="quick-action-btn" data-action="dashboard">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                </svg>
+                Dashboard
+            </button>
+            <button class="quick-action-btn" data-action="settings">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                </svg>
+                Settings
+            </button>
+        </div>
+
+        <!-- Quick Links Section -->
+        <div class="quick-links-section" id="quick-links-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                Quick Links
+            </h2>
+            <div class="quick-links-grid" id="quick-links-grid"></div>
+
+            <!-- Recent Searches -->
+            <div id="recent-searches-container" style="display: none;">
+                <h2 class="section-title">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+                    </svg>
+                    Recent Searches
+                </h2>
+                <div class="recent-searches" id="recent-searches"></div>
+            </div>
+        </div>
+
+        <!-- Keyboard Shortcuts Section -->
+        <div class="shortcuts-section" id="shortcuts-section">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.5 4.5c-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5-1.45 0-2.99.22-4.28.79C1.49 5.62 1 6.33 1 7.14v11.28c0 1.3 1.22 2.26 2.48 1.94.98-.25 2.02-.36 3.02-.36 1.56 0 3.22.26 4.56.92.6.3 1.28.3 1.88 0 1.34-.67 3-.92 4.56-.92 1 0 2.04.11 3.02.36 1.26.33 2.48-.63 2.48-1.94V7.14c0-.81-.49-1.52-1.22-1.85-1.29-.57-2.83-.79-4.28-.79zM21 17.23c0 .63-.58 1.09-1.2.98-.75-.14-1.53-.2-2.3-.2-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5.77 0 1.55.06 2.3.2.62.11 1.2.35 1.2.98v9.55z"/>
+                </svg>
+                Keyboard Shortcuts
+            </h2>
+            <div class="shortcuts-grid" id="shortcuts-grid"></div>
+        </div>
+
+        <!-- Search Stats -->
+        <div class="search-stats" id="search-stats" style="display: none;">
+            <div class="stat-item">
+                <div class="stat-number" id="total-results">0</div>
+                <div class="stat-label">Results Found</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="search-time">0ms</div>
+                <div class="stat-label">Search Time</div>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div class="search-results-container" id="search-results-container">
+            <div class="no-results-state" id="no-results-state">
+                <div class="no-results-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                </div>
+                <h3 class="no-results-title">Start Searching</h3>
+                <p class="no-results-subtitle">Enter a search term above to find pages, features, and information</p>
+                <div class="search-suggestions">
+                    <button class="suggestion-btn" data-suggestion="audit">audit</button>
+                    <button class="suggestion-btn" data-suggestion="dashboard">dashboard</button>
+                    <button class="suggestion-btn" data-suggestion="reports">reports</button>
+                    <button class="suggestion-btn" data-suggestion="settings">settings</button>
+                    <button class="suggestion-btn" data-suggestion="performance">performance</button>
+                </div>
+            </div>
+
+            <div class="search-results-header" id="search-results-header" style="display: none;">
+                <div class="results-count" id="results-count">0 results found</div>
+                <div class="results-sort">
+                    <label for="sort-select">Sort by:</label>
+                    <select id="sort-select" class="sort-select">
+                        <option value="relevance">Relevance</option>
+                        <option value="title">Title A-Z</option>
+                        <option value="type">Type</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="search-results-grid" id="search-results-grid"></div>
+        </div>
+    </div>
+</main>
+
+<script>
+// Search Page Functionality
+class SearchPage {
+    constructor() {
+        this.searchIndex = new Map()
+        this.allItems = []
+        this.searchResults = []
+        this.currentFilter = 'all'
+        this.currentSort = 'relevance'
+        this.isSearching = false
+        this.searchDebounceTimer = null
+        this.lastSearchTime = 0
+        this.selectedResultIndex = -1
+        this.recentSearches = this.loadRecentSearches()
+        this.init()
+    }
+
+    init() {
+        console.log('SearchPage: Initializing...')
+        this.buildSearchIndex()
+        console.log(`SearchPage: Built index with ${this.allItems.length} items`)
+        this.setupEventListeners()
+        this.setupQuickLinks()
+        this.setupKeyboardShortcuts()
+        this.setupQuickActions()
+        this.displayRecentSearches()
+        this.handleURLParams()
+        
+        // Auto-focus search input on page load
+        setTimeout(() => {
+            const searchInput = document.getElementById('search-input-large')
+            if (searchInput) {
+                searchInput.focus()
+            }
+        }, 100)
+    }
+
+    buildSearchIndex() {
+        this.allItems = [
+            { type: "page", title: "Home", url: "home.html", keywords: ["home", "dashboard", "main", "overview", "landing"], description: "Main dashboard and overview page" },
+            { type: "audit", title: "Create Audit", url: "create-audit.html", keywords: ["create", "audit", "new", "start", "begin", "initiate", "launch"], description: "Create and initiate new audit processes" },
+            { type: "audit", title: "Edit Audit", url: "edit-audit.html", keywords: ["edit", "audit", "modify", "update", "change", "revise"], description: "Edit and modify existing audit records" },
+            { type: "audit", title: "View Audit", url: "audit-view.html", keywords: ["view", "audit", "details", "inspect", "review", "examine"], description: "View detailed audit information and results" },
+            { type: "dashboard", title: "Auditor Dashboard", url: "auditor-dashboard.html", keywords: ["auditor", "dashboard", "monitor", "track", "overview"], description: "Comprehensive auditor dashboard for monitoring audit activities" },
+            { type: "audit", title: "Audit Distribution", url: "audit-distribution.html", keywords: ["distribution", "assign", "allocate", "spread", "delegate"], description: "Distribute and assign audits to team members" },
+            { type: "report", title: "Expert Audits", url: "expert-audits.html", keywords: ["reports", "expert", "audits", "analytics", "data", "statistics", "review"], description: "Generate and view comprehensive expert audit reports" },
+            { type: "report", title: "AI Audits", url: "ai-audits.html", keywords: ["ai", "artificial", "intelligence", "audits", "automated", "machine", "learning"], description: "View AI-powered audit analysis and insights" },
+            { type: "performance", title: "Employee Performance", url: "employee-performance.html", keywords: ["performance", "metrics", "kpi", "employee", "staff", "team", "productivity"], description: "Monitor and analyze employee performance metrics" },
+            { type: "audit", title: "Reversal", url: "reversal.html", keywords: ["reversal", "undo", "cancel", "reverse", "revoke", "rollback"], description: "Reverse or undo audit actions and processes" },
+            { type: "setting", title: "Settings", url: "settings.html", keywords: ["settings", "config", "preferences", "options", "configuration"], description: "System configuration and user preferences" },
+            { type: "profile", title: "Profile", url: "profile.html", keywords: ["profile", "user", "account", "personal", "information"], description: "User profile and account management" },
+            { type: "feature", title: "Improvement Corner", url: "improvement-corner.html", keywords: ["improvement", "suggestions", "feedback", "enhancement", "ideas"], description: "Submit and track improvement suggestions" },
+            { type: "report", title: "Scorecards", url: "scorecards.html", keywords: ["scorecard", "score", "cards", "evaluation", "rating", "assessment"], description: "View and manage audit scorecards and evaluations" },
+            { type: "page", title: "Calibration", url: "calibration.html", keywords: ["calibration", "calibrate", "adjust", "align", "standardize"], description: "Calibration sessions and quality alignment" },
+            { type: "page", title: "User Management", url: "user-management.html", keywords: ["user", "management", "users", "admin", "accounts", "permissions"], description: "Manage users, roles, and permissions" },
+            { type: "page", title: "Grading Guide", url: "grading-guide.html", keywords: ["grading", "guide", "grades", "scoring", "rubric", "criteria"], description: "Guide for understanding grading and scoring systems" },
+            { type: "page", title: "Scoring Basics", url: "article-scoring-basics.html", keywords: ["scoring", "basics", "fundamentals", "how", "to", "score"], description: "Learn the basics of scoring audits" },
+            { type: "page", title: "Scoring Types", url: "article-scoring-types.html", keywords: ["scoring", "types", "methods", "categories", "varieties"], description: "Different types and methods of scoring" },
+            { type: "page", title: "Common Scenarios", url: "article-common-scenarios.html", keywords: ["scenarios", "common", "examples", "use", "cases", "situations"], description: "Common audit scenarios and use cases" },
+            { type: "page", title: "ATA", url: "ata.html", keywords: ["ata", "audit", "analysis", "tracking"], description: "Audit Tracking and Analysis" }
+        ]
+
+        // Build keyword index for fast lookups (optional optimization)
+        this.allItems.forEach((item) => {
+            item.keywords.forEach((keyword) => {
+                if (!this.searchIndex.has(keyword.toLowerCase())) {
+                    this.searchIndex.set(keyword.toLowerCase(), [])
+                }
+                this.searchIndex.get(keyword.toLowerCase()).push(item)
+            })
+        })
+    }
+
+    setupEventListeners() {
+        const searchInput = document.getElementById('search-input-large')
+        const searchBtn = document.getElementById('search-btn-large')
+        const filterBtns = document.querySelectorAll('.filter-btn')
+        const sortSelect = document.getElementById('sort-select')
+        const suggestionBtns = document.querySelectorAll('.suggestion-btn')
+
+        // Search input events
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.trim()
+                
+                // Clear previous debounce timer
+                if (this.searchDebounceTimer) {
+                    clearTimeout(this.searchDebounceTimer)
+                }
+                
+                // Debounce search for better performance
+                this.searchDebounceTimer = setTimeout(() => {
+                    if (query.length >= 2) {
+                        this.handleSearch(query)
+                    } else if (query.length === 0) {
+                        this.showNoResultsState()
+                    }
+                }, 300)
+            })
+
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault()
+                    if (this.searchDebounceTimer) {
+                        clearTimeout(this.searchDebounceTimer)
+                    }
+                    // If a result is selected, navigate to it
+                    if (this.selectedResultIndex >= 0) {
+                        const cards = document.querySelectorAll('.search-result-card')
+                        if (cards[this.selectedResultIndex]) {
+                            cards[this.selectedResultIndex].click()
+                        }
+                    } else {
+                        this.performSearch(e.target.value.trim())
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault()
+                    this.navigateResults(1)
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault()
+                    this.navigateResults(-1)
+                } else if (e.key === 'Escape') {
+                    e.preventDefault()
+                    this.clearSearch()
+                } else if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+                    // Focus search on "/" key (but not if typing in input)
+                    if (document.activeElement !== searchInput) {
+                        e.preventDefault()
+                        searchInput.focus()
+                    }
+                }
+            })
+        }
+
+        // Search button
+        if (searchBtn && searchInput) {
+            searchBtn.addEventListener('click', () => {
+                if (this.searchDebounceTimer) {
+                    clearTimeout(this.searchDebounceTimer)
+                }
+                this.performSearch(searchInput.value.trim())
+            })
+        }
+
+        // Filter buttons
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.setFilter(btn.dataset.filter)
+            })
+        })
+
+        // Sort select
+        if (sortSelect) {
+            sortSelect.addEventListener('change', (e) => {
+                this.setSort(e.target.value)
+            })
+        }
+
+        // Suggestion buttons
+        suggestionBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                searchInput.value = btn.dataset.suggestion
+                this.performSearch(btn.dataset.suggestion)
+            })
+        })
+
+        // Global keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Focus search on "/" key (but not when typing in input/textarea)
+            if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                const activeElement = document.activeElement
+                const isInput = activeElement && (
+                    activeElement.tagName === 'INPUT' ||
+                    activeElement.tagName === 'TEXTAREA' ||
+                    activeElement.isContentEditable
+                )
+                
+                if (!isInput) {
+                    e.preventDefault()
+                    searchInput?.focus()
+                }
+            }
+        })
+    }
+
+    handleURLParams() {
+        const urlParams = new URLSearchParams(window.location.search)
+        const query = urlParams.get('q')
+        if (query) {
+            document.getElementById('search-input-large').value = query
+            this.performSearch(query)
+        }
+    }
+
+    handleSearch(query) {
+        const trimmedQuery = query.trim()
+        if (trimmedQuery.length < 2) {
+            this.searchResults = []
+            this.showNoResultsState()
+            return
+        }
+
+        console.log(`SearchPage: handleSearch called with "${trimmedQuery}"`)
+        this.searchResults = this.search(trimmedQuery)
+        console.log(`SearchPage: handleSearch found ${this.searchResults.length} results`)
+        this.displayResults()
+    }
+
+    performSearch(query) {
+        const trimmedQuery = query.trim()
+        if (!trimmedQuery) {
+            console.log('SearchPage: Empty query, returning')
+            return
+        }
+
+        console.log(`SearchPage: Performing search for "${trimmedQuery}"`)
+        this.isSearching = true
+        this.selectedResultIndex = -1
+        this.showLoadingState()
+
+        // Hide quick links, shortcuts, and quick actions when searching
+        document.getElementById('quick-links-section')?.classList.add('hidden')
+        document.getElementById('shortcuts-section')?.classList.add('hidden')
+        document.getElementById('quick-actions')?.classList.add('hidden')
+
+        // Record search start time
+        const startTime = performance.now()
+
+        // Perform search
+        setTimeout(() => {
+            this.searchResults = this.search(trimmedQuery)
+            console.log(`SearchPage: Found ${this.searchResults.length} results`)
+            this.isSearching = false
+            
+            // Calculate search time
+            const endTime = performance.now()
+            this.lastSearchTime = Math.round(endTime - startTime)
+            
+            // Save to recent searches
+            this.saveRecentSearch(trimmedQuery)
+            
+            this.displayResults()
+            this.updateURL(trimmedQuery)
+        }, 100)
+    }
+
+    search(query) {
+        const results = []
+        const queryLower = query.toLowerCase().trim()
+        const queryTerms = queryLower.split(/\s+/).filter(term => term.length > 0)
+
+        if (!queryLower || queryTerms.length === 0) {
+            return []
+        }
+
+        // Search through ALL items directly
+        if (this.allItems && this.allItems.length > 0) {
+            this.allItems.forEach((item) => {
+                if (this.itemMatchesQuery(item, queryLower, queryTerms)) {
+                    results.push(item)
+                }
+            })
+        }
+
+        const uniqueResults = this.removeDuplicates(results)
+        return this.sortByRelevance(uniqueResults, query)
+    }
+
+    itemMatchesQuery(item, queryLower, queryTerms) {
+        if (!item || !queryLower) return false
+
+        const titleLower = item.title ? item.title.toLowerCase() : ''
+        const descLower = item.description ? item.description.toLowerCase() : ''
+        const urlLower = item.url ? item.url.toLowerCase() : ''
+        
+        // Single word search - check if query appears anywhere
+        if (queryTerms.length === 1) {
+            const term = queryTerms[0]
+            
+            // Check title
+            if (titleLower.includes(term)) {
+                return true
+            }
+            
+            // Check description
+            if (descLower.includes(term)) {
+                return true
+            }
+            
+            // Check URL
+            if (urlLower.includes(term)) {
+                return true
+            }
+            
+            // Check keywords
+            if (item.keywords && Array.isArray(item.keywords)) {
+                for (const keyword of item.keywords) {
+                    if (keyword.toLowerCase().includes(term)) {
+                        return true
+                    }
+                }
+            }
+        } else {
+            // Multi-word search - all terms must match somewhere
+            const allTermsMatch = queryTerms.every(term => {
+                // Check title
+                if (titleLower.includes(term)) return true
+                
+                // Check description
+                if (descLower.includes(term)) return true
+                
+                // Check URL
+                if (urlLower.includes(term)) return true
+                
+                // Check keywords
+                if (item.keywords && Array.isArray(item.keywords)) {
+                    for (const keyword of item.keywords) {
+                        if (keyword.toLowerCase().includes(term)) {
+                            return true
+                        }
+                    }
+                }
+                
+                return false
+            })
+            
+            if (allTermsMatch) {
+                return true
+            }
+        }
+        
+        return false
+    }
+
+    removeDuplicates(results) {
+        const seen = new Set()
+        return results.filter((result) => {
+            const key = `${result.type}-${result.title}`
+            if (seen.has(key)) {
+                return false
+            }
+            seen.add(key)
+            return true
+        })
+    }
+
+    sortByRelevance(results, query) {
+        return results.sort((a, b) => {
+            const aScore = this.calculateRelevanceScore(a, query)
+            const bScore = this.calculateRelevanceScore(b, query)
+            return bScore - aScore
+        })
+    }
+
+    calculateRelevanceScore(result, query) {
+        let score = 0
+        const queryLower = query.toLowerCase()
+        const titleLower = result.title.toLowerCase()
+        const queryTerms = queryLower.split(/\s+/).filter(term => term.length > 0)
+
+        // Exact title match gets highest score
+        if (titleLower === queryLower) {
+            score += 100
+        } else if (titleLower.startsWith(queryLower)) {
+            score += 50
+        } else if (titleLower.includes(queryLower)) {
+            score += 25
+        }
+
+        // Check if all query terms appear in title (for multi-word queries)
+        if (queryTerms.length > 1) {
+            const allTermsInTitle = queryTerms.every(term => titleLower.includes(term))
+            if (allTermsInTitle) {
+                score += 30
+            }
+        }
+
+        // Description matching
+        if (result.description) {
+            const descLower = result.description.toLowerCase()
+            if (descLower.includes(queryLower)) {
+                score += 15
+            }
+        }
+
+        // Keyword matching
+        if (result.keywords) {
+            result.keywords.forEach((keyword) => {
+                const keywordLower = keyword.toLowerCase()
+                if (keywordLower === queryLower) {
+                    score += 20
+                } else if (keywordLower.includes(queryLower)) {
+                    score += 10
+                }
+            })
+            
+            // Check if all query terms match keywords
+            if (queryTerms.length > 1) {
+                const keywordLower = result.keywords.map(k => k.toLowerCase())
+                const allTermsMatchKeywords = queryTerms.every(term => 
+                    keywordLower.some(kw => kw.includes(term))
+                )
+                if (allTermsMatchKeywords) {
+                    score += 15
+                }
+            }
+        }
+
+        return score
+    }
+
+    setFilter(filter) {
+        this.currentFilter = filter
+        
+        // Update filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.filter === filter)
+        })
+
+        this.displayResults()
+    }
+
+    setSort(sort) {
+        this.currentSort = sort
+        this.displayResults()
+    }
+
+    displayResults() {
+        const container = document.getElementById('search-results-container')
+        const header = document.getElementById('search-results-header')
+        const grid = document.getElementById('search-results-grid')
+        const noResults = document.getElementById('no-results-state')
+        const stats = document.getElementById('search-stats')
+
+        if (this.isSearching) {
+            this.showLoadingState()
+            return
+        }
+
+        let filteredResults = this.searchResults
+
+        // Apply filter
+        if (this.currentFilter !== 'all') {
+            filteredResults = filteredResults.filter(result => result.type === this.currentFilter)
+        }
+
+        // Apply sort
+        filteredResults = this.applySort(filteredResults)
+
+        if (filteredResults.length === 0) {
+            this.showNoResultsState()
+            return
+        }
+
+        // Reset selected index when displaying new results
+        this.selectedResultIndex = -1
+
+        // Show results
+        noResults.style.display = 'none'
+        header.style.display = 'flex'
+        stats.style.display = 'flex'
+        grid.innerHTML = ''
+
+        // Update stats
+        document.getElementById('total-results').textContent = filteredResults.length
+        document.getElementById('results-count').textContent = `${filteredResults.length} result${filteredResults.length !== 1 ? 's' : ''} found`
+        document.getElementById('search-time').textContent = `${this.lastSearchTime}ms`
+
+        // Display results
+        filteredResults.forEach(result => {
+            const card = this.createResultCard(result)
+            grid.appendChild(card)
+        })
+    }
+
+    applySort(results) {
+        switch (this.currentSort) {
+            case 'title':
+                return results.sort((a, b) => a.title.localeCompare(b.title))
+            case 'type':
+                return results.sort((a, b) => a.type.localeCompare(b.type))
+            case 'relevance':
+            default:
+                return results
+        }
+    }
+
+    createResultCard(result) {
+        const card = document.createElement('div')
+        card.className = 'search-result-card'
+        card.onclick = () => window.location.href = result.url
+
+        const icon = this.getResultIcon(result.type)
+        const keywords = this.getResultKeywords(result)
+        const highlightedTitle = this.highlightSearchTerm(result.title, this.getCurrentQuery())
+
+        card.innerHTML = `
+            <div class="result-card-header">
+                <div class="result-card-icon">
+                    ${icon}
+                </div>
+                <div class="result-card-content">
+                    <h3 class="result-card-title">${highlightedTitle}</h3>
+                    <div class="result-card-type">${result.type}</div>
+                    <p class="result-card-description">${result.description || 'No description available'}</p>
+                    <div class="result-card-keywords">${keywords}</div>
+                </div>
+            </div>
+        `
+
+        return card
+    }
+
+    getResultIcon(type) {
+        const icons = {
+            page: `<svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+            </svg>`,
+            audit: `<svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>`,
+            dashboard: `<svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+            </svg>`,
+            report: `<svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+            </svg>`,
+            performance: `<svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>`,
+            setting: `<svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+            </svg>`,
+            profile: `<svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm0 14c-2.03 0-4.43-.82-6.14-2.88C7.55 15.8 9.68 15 12 15s4.45.8 6.14 2.12C16.43 19.18 14.03 20 12 20z"/>
+            </svg>`,
+            feature: `<svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>`
+        }
+        return icons[type] || icons.page
+    }
+
+    getResultKeywords(result) {
+        if (!result.keywords || result.keywords.length === 0) return ''
+        
+        const maxKeywords = 4
+        const keywords = result.keywords.slice(0, maxKeywords)
+        
+        return keywords.map(keyword => 
+            `<span class="result-keyword">${keyword}</span>`
+        ).join('')
+    }
+
+    highlightSearchTerm(text, query) {
+        if (!query || query.length < 2) return text
+        
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+        return text.replace(regex, '<mark style="background: rgba(26, 115, 62, 0.2); color: var(--primary-color); padding: 0.0938rem 0.1875rem; border-radius: 0.1875rem; font-weight: 600;">$1</mark>')
+    }
+
+    getCurrentQuery() {
+        const searchInput = document.getElementById('search-input-large')
+        return searchInput ? searchInput.value : ''
+    }
+
+    showNoResultsState() {
+        const noResults = document.getElementById('no-results-state')
+        const searchInput = document.getElementById('search-input-large')
+        const query = searchInput ? searchInput.value.trim() : ''
+        
+        // Update no results message based on whether there's a query
+        if (query.length >= 2) {
+            const titleEl = noResults.querySelector('.no-results-title')
+            const subtitleEl = noResults.querySelector('.no-results-subtitle')
+            if (titleEl) titleEl.textContent = 'No Results Found'
+            if (subtitleEl) subtitleEl.textContent = `No results found for "${query}". Try different keywords or check your spelling.`
+            // Keep quick links hidden when there's a query but no results
+            document.getElementById('quick-links-section')?.classList.add('hidden')
+            document.getElementById('shortcuts-section')?.classList.add('hidden')
+        } else {
+            const titleEl = noResults.querySelector('.no-results-title')
+            const subtitleEl = noResults.querySelector('.no-results-subtitle')
+            if (titleEl) titleEl.textContent = 'Start Searching'
+            if (subtitleEl) subtitleEl.textContent = 'Enter a search term above to find pages, features, and information'
+            // Show quick links, shortcuts, and quick actions when no query
+            document.getElementById('quick-links-section')?.classList.remove('hidden')
+            document.getElementById('shortcuts-section')?.classList.remove('hidden')
+            document.getElementById('quick-actions')?.classList.remove('hidden')
+        }
+        
+        noResults.style.display = 'block'
+        document.getElementById('search-results-header').style.display = 'none'
+        document.getElementById('search-stats').style.display = 'none'
+        document.getElementById('search-results-grid').innerHTML = ''
+        this.selectedResultIndex = -1
+    }
+
+    showLoadingState() {
+        const grid = document.getElementById('search-results-grid')
+        grid.innerHTML = `
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Searching...</p>
+            </div>
+        `
+        document.getElementById('no-results-state').style.display = 'none'
+        document.getElementById('search-results-header').style.display = 'none'
+        document.getElementById('search-stats').style.display = 'none'
+    }
+
+    updateURL(query) {
+        const url = new URL(window.location)
+        url.searchParams.set('q', query)
+        window.history.replaceState({}, '', url)
+    }
+
+    // Quick Links
+    setupQuickLinks() {
+        const quickLinks = [
+            { title: "Create Audit", url: "create-audit.html", icon: "audit", subtitle: "Start new audit" },
+            { title: "Auditor Dashboard", url: "auditor-dashboard.html", icon: "dashboard", subtitle: "View dashboard" },
+            { title: "Expert Audits", url: "expert-audits.html", icon: "report", subtitle: "View reports" },
+            { title: "Employee Performance", url: "employee-performance.html", icon: "performance", subtitle: "Track metrics" },
+            { title: "Settings", url: "settings.html", icon: "setting", subtitle: "Configure system" },
+            { title: "Profile", url: "profile.html", icon: "profile", subtitle: "Your account" }
+        ]
+
+        const grid = document.getElementById('quick-links-grid')
+        if (!grid) return
+
+        grid.innerHTML = quickLinks.map(link => {
+            const icon = this.getResultIcon(link.icon)
+            return `
+                <a href="${link.url}" class="quick-link-card">
+                    <div class="quick-link-icon">${icon}</div>
+                    <div class="quick-link-content">
+                        <div class="quick-link-title">${link.title}</div>
+                        <div class="quick-link-subtitle">${link.subtitle}</div>
+                    </div>
+                </a>
+            `
+        }).join('')
+    }
+
+    // Quick Actions
+    setupQuickActions() {
+        const actionBtns = document.querySelectorAll('.quick-action-btn')
+        actionBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action
+                const actionMap = {
+                    'home': 'home.html',
+                    'create-audit': 'create-audit.html',
+                    'dashboard': 'auditor-dashboard.html',
+                    'settings': 'settings.html'
+                }
+                if (actionMap[action]) {
+                    window.location.href = actionMap[action]
+                }
+            })
+        })
+    }
+
+    // Keyboard Shortcuts
+    setupKeyboardShortcuts() {
+        const shortcuts = [
+            { label: "Focus search", keys: ["/"] },
+            { label: "Search", keys: ["Enter"] },
+            { label: "Navigate down", keys: ["↓"] },
+            { label: "Navigate up", keys: ["↑"] },
+            { label: "Clear search", keys: ["Esc"] },
+            { label: "Open result", keys: ["Enter"] }
+        ]
+
+        const grid = document.getElementById('shortcuts-grid')
+        if (!grid) return
+
+        grid.innerHTML = shortcuts.map(shortcut => {
+            const keys = shortcut.keys.map(key => `<span class="key">${key}</span>`).join('')
+            return `
+                <div class="shortcut-item">
+                    <span class="shortcut-label">${shortcut.label}</span>
+                    <div class="shortcut-keys">${keys}</div>
+                </div>
+            `
+        }).join('')
+    }
+
+    // Recent Searches
+    loadRecentSearches() {
+        try {
+            const stored = localStorage.getItem('qms_recent_searches')
+            return stored ? JSON.parse(stored) : []
+        } catch (e) {
+            return []
+        }
+    }
+
+    saveRecentSearch(query) {
+        if (!query || query.length < 2) return
+        
+        // Remove if already exists
+        this.recentSearches = this.recentSearches.filter(s => s !== query)
+        
+        // Add to beginning
+        this.recentSearches.unshift(query)
+        
+        // Keep only last 5
+        this.recentSearches = this.recentSearches.slice(0, 5)
+        
+        // Save to localStorage
+        try {
+            localStorage.setItem('qms_recent_searches', JSON.stringify(this.recentSearches))
+        } catch (e) {
+            console.error('Failed to save recent searches:', e)
+        }
+        
+        this.displayRecentSearches()
+    }
+
+    displayRecentSearches() {
+        const container = document.getElementById('recent-searches-container')
+        const list = document.getElementById('recent-searches')
+        
+        if (!container || !list) return
+        
+        if (this.recentSearches.length === 0) {
+            container.style.display = 'none'
+            return
+        }
+        
+        container.style.display = 'block'
+        list.innerHTML = this.recentSearches.map(search => `
+            <div class="recent-search-chip">
+                <span onclick="window.SearchPage.performSearch('${search.replace(/'/g, "\\'")}')">${search}</span>
+                <button class="remove-btn" onclick="event.stopPropagation(); window.SearchPage.removeRecentSearch('${search.replace(/'/g, "\\'")}')">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+        `).join('')
+    }
+
+    removeRecentSearch(query) {
+        this.recentSearches = this.recentSearches.filter(s => s !== query)
+        try {
+            localStorage.setItem('qms_recent_searches', JSON.stringify(this.recentSearches))
+        } catch (e) {
+            console.error('Failed to save recent searches:', e)
+        }
+        this.displayRecentSearches()
+    }
+
+    // Keyboard Navigation
+    navigateResults(direction) {
+        const cards = document.querySelectorAll('.search-result-card')
+        if (cards.length === 0) return
+
+        // Remove previous selection
+        if (this.selectedResultIndex >= 0 && cards[this.selectedResultIndex]) {
+            cards[this.selectedResultIndex].classList.remove('keyboard-focused')
+        }
+
+        // Update index
+        this.selectedResultIndex += direction
+
+        // Clamp to valid range
+        if (this.selectedResultIndex < 0) {
+            this.selectedResultIndex = -1
+            document.getElementById('search-input-large')?.focus()
+            return
+        }
+        if (this.selectedResultIndex >= cards.length) {
+            this.selectedResultIndex = cards.length - 1
+        }
+
+        // Highlight selected card
+        if (this.selectedResultIndex >= 0 && cards[this.selectedResultIndex]) {
+            cards[this.selectedResultIndex].classList.add('keyboard-focused')
+            cards[this.selectedResultIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        }
+    }
+
+    clearSearch() {
+        const searchInput = document.getElementById('search-input-large')
+        if (searchInput) {
+            searchInput.value = ''
+            searchInput.focus()
+        }
+        this.searchResults = []
+        this.selectedResultIndex = -1
+        this.showNoResultsState()
+        this.updateURL('')
+        
+        // Show quick links, shortcuts, and quick actions again
+        document.getElementById('quick-links-section')?.classList.remove('hidden')
+        document.getElementById('shortcuts-section')?.classList.remove('hidden')
+        document.getElementById('quick-actions')?.classList.remove('hidden')
+    }
+}
+
+// Initialize search page when DOM is loaded
+function initializeSearchPage() {
+    if (window.SearchPage) {
+        console.log('SearchPage: Already initialized, skipping')
+        return
+    }
+    
+    console.log('SearchPage: Creating SearchPage instance')
+    try {
+    window.SearchPage = new SearchPage()
+        console.log('SearchPage: Successfully initialized')
+    } catch (error) {
+        console.error('SearchPage: Error initializing', error)
+    }
+}
+
+// Check if DOM is already loaded
+if (document.readyState === 'loading') {
+    // DOM is still loading, wait for it
+    console.log('SearchPage: Waiting for DOM to load')
+    document.addEventListener('DOMContentLoaded', initializeSearchPage)
+} else {
+    // DOM is already loaded, initialize immediately
+    console.log('SearchPage: DOM already loaded, initializing immediately')
+    initializeSearchPage()
+}
+</script>
+</body>
+</html>

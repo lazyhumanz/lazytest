@@ -1,0 +1,3507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Calibration | QMS</title>
+<meta name="description" content="Quality Management System - Calibration Management">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAtOTYwIDk2MCA5NjAiIHdpZHRoPSIyNHB4IiBmaWxsPSIjMWY5ZTRiIj48cGF0aCBkPSJNMjAwLTEyMHEtMzMgMC01Ni41LTIzLjVUMTIwLTIwMHYtNTYwcTAtMzMgMjMuNS01Ni41VDIwMC04NDBoNTYwcTMzIDAgNTYuNSAyMy41VDg0MC03NjB2NTYwcTAgMzMtMjMuNSA1Ni41VDc2MC0xMjBIMjAwWm00OTEtODBoNjl2LTY5bC02OSA2OVptLTQ1NyAwaDczbDEyMC0xMjBoODVMNDUyLTIwMGg2NGwxMjAtMTIwaDg1TDU0MS0yMDBoNjVsMTIwLTEyMGgzNHYtNDQwSDIwMHY1MDlsNjktNjloODVMNDM0LTIwMFptNzItMjAwLTU2LTU2IDE3Ny0xNzcgODAgODAgMTQ3LTE0NyA1NiA1Ni0yMDMgMjA0LTgwLTgwLTEyMSAxMjBaIi8+PC9zdmc+">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="sidebar.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#1a733e',
+              'primary-dark': '#0d5e3a',
+              'dark-forest': '#032816',
+              'success': '#10b981',
+              'warning': '#f59e0b',
+              'error': '#ef4444',
+            },
+            fontFamily: {
+              sans: ['Poppins', 'sans-serif'],
+            },
+          },
+        },
+      }
+    </script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="env-config.js"></script>
+    <script src="supabase-config.js"></script>
+    <script src="auth-check.js"></script>
+    <script src="access-control.js"></script>
+    <script src="confirmation-dialog.js"></script>
+    <script src="load-sidebar.js"></script>
+    <script src="search.js"></script>
+    <script src="form-validation.js"></script>
+    <style>
+        .calibration-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 0;
+            width: 100%;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+            gap: 0.5625rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            border: 0.0469rem solid #e5e7eb;
+            transition: all 0.2s ease;
+            box-shadow: 0 0.0469rem 0.1406rem rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 0.1875rem 0.2812rem -0.0469rem rgba(0, 0, 0, 0.1);
+            transform: translateY(-0.0938rem);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.375rem;
+        }
+
+        .stat-title {
+            font-size: 0.5625rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-icon {
+            width: 0.9375rem;
+            height: 0.9375rem;
+            color: var(--primary-color);
+        }
+
+        .stat-value {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.1875rem;
+        }
+
+        .stat-subtitle {
+            font-size: 0.4688rem;
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .section-card {
+            background: #ffffff;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            border: 0.0469rem solid #e5e7eb;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 0.0469rem 0.1406rem rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5625rem;
+            padding-bottom: 0.375rem;
+            border-bottom: 0.0469rem solid #e5e7eb;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #1A733E;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border: none;
+            border-radius: 0.1875rem;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.6094rem;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2812rem;
+            box-shadow: 0 0.0469rem 0.0938rem rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            box-shadow: 0 0.0938rem 0.1875rem rgba(0, 0, 0, 0.15);
+            transform: translateY(-0.0469rem);
+        }
+
+        .btn-secondary {
+            background-color: #f9fafb;
+            color: #374151;
+            border: 0.0469rem solid #d1d5db;
+            border-radius: 0.1875rem;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.6094rem;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 0.0234rem 0.0469rem rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-secondary:hover {
+            background-color: #f3f4f6;
+            border-color: #9ca3af;
+            box-shadow: 0 0.0469rem 0.0938rem rgba(0, 0, 0, 0.1);
+        }
+
+        .calibration-session-card {
+            background: #ffffff;
+            border: 0.0469rem solid #e5e7eb;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5625rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 0.0234rem 0.0469rem rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .calibration-session-card:hover {
+            box-shadow: 0 0.0938rem 0.2812rem rgba(0, 0, 0, 0.08);
+            transform: translateY(-0.0234rem);
+            border-color: #d1d5db;
+        }
+
+        .calibration-session-card:active {
+            transform: translateY(0);
+        }
+
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5625rem;
+            gap: 0.5625rem;
+        }
+
+        .session-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .session-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.375rem;
+            line-height: 1.4;
+        }
+
+        .session-meta {
+            font-size: 0.5625rem;
+            color: #6b7280;
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.375rem;
+        }
+
+        .session-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.2812rem;
+        }
+
+        .session-meta-item svg {
+            width: 0.6562rem;
+            height: 0.6562rem;
+            opacity: 0.6;
+        }
+
+        .session-status {
+            padding: 0.1875rem 0.375rem;
+            border-radius: 0.1875rem;
+            font-size: 0.5156rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .status-active {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-completed {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .session-participants {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.2812rem;
+            margin-top: 0.375rem;
+            padding-top: 0.375rem;
+            border-top: 0.0469rem solid #f3f4f6;
+        }
+
+        .participant-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2812rem;
+            padding: 0.1875rem 0.375rem;
+            background-color: #f9fafb;
+            border: 0.0469rem solid #e5e7eb;
+            border-radius: 0.1875rem;
+            font-size: 0.5156rem;
+            color: #4b5563;
+        }
+
+        .session-actions {
+            display: flex;
+            gap: 0.2812rem;
+            flex-wrap: wrap;
+            margin-top: 0.5625rem;
+            padding-top: 0.5625rem;
+            border-top: 0.0469rem solid #f3f4f6;
+        }
+
+        .session-actions button {
+            pointer-events: auto;
+        }
+
+        .btn-small {
+            padding: 0.2812rem 0.5625rem;
+            font-size: 0.6094rem;
+            border-radius: 0.1875rem;
+        }
+
+        .filter-panel {
+            display: none;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0.75rem 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-panel.active {
+            display: block;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-size: 0.5156rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.1875rem;
+        }
+
+        .filter-select, .filter-input {
+            padding: 0.2812rem 0.375rem;
+            border: 0.0469rem solid #d1d5db;
+            border-radius: 0.1875rem;
+            font-size: 0.6094rem;
+            font-family: 'Poppins', sans-serif;
+            background-color: white;
+            transition: all 0.2s ease;
+        }
+
+        .filter-select:focus, .filter-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 56rem;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 0.0469rem solid #e5e7eb;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #374151;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.125rem;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 0.2812rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.1875rem;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .modal-body {
+            padding: 0.75rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.375rem;
+            padding: 0.75rem;
+            border-top: 0.0469rem solid #e5e7eb;
+        }
+
+        .form-group {
+            margin-bottom: 0.75rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.5625rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.1875rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.375rem 0.5625rem;
+            border: 0.0469rem solid #d1d5db;
+            border-radius: 0.1875rem;
+            font-size: 0.6094rem;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .participant-list {
+            max-height: 9.375rem;
+            overflow-y: auto;
+            border: 0.0469rem solid #e5e7eb;
+            border-radius: 0.1875rem;
+            padding: 0.375rem;
+            background-color: #fafafa;
+        }
+
+        .participant-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem;
+            border-bottom: 0.0469rem solid #f3f4f6;
+            transition: background-color 0.2s ease;
+        }
+
+        .participant-item:hover {
+            background-color: #f9fafb;
+        }
+
+        .participant-item:last-child {
+            border-bottom: none;
+        }
+
+        .participant-item input[type="checkbox"] {
+            width: 0.75rem;
+            height: 0.75rem;
+            cursor: pointer;
+        }
+
+        .participant-item label {
+            cursor: pointer;
+            font-size: 0.6094rem;
+            flex: 1;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 1.5rem;
+            color: #6b7280;
+            font-size: 0.6094rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem 0.75rem;
+            color: #6b7280;
+        }
+
+        .empty-state svg {
+            width: 2rem;
+            height: 2rem;
+            margin: 0 auto 0.5625rem;
+            opacity: 0.3;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .comparison-table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .score-variance {
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .variance-low {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .variance-medium {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .variance-high {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+
+<body>
+<!-- Sidebar will be loaded dynamically by load-sidebar.js -->
+<main class="main-content" role="main">
+    <p class="page-heading">Calibration</p>
+    <div style="margin-bottom: 1.125rem;"></div>
+
+    <div class="calibration-container" style="margin-top: 2rem;">
+        <!-- Statistics Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Total Sessions</span>
+                    <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </div>
+                <div class="stat-value" id="totalSessions">-</div>
+                <div class="stat-subtitle">All calibration sessions</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Active Sessions</span>
+                    <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12,6 12,12 16,14"/>
+                    </svg>
+                </div>
+                <div class="stat-value" id="activeSessions">-</div>
+                <div class="stat-subtitle">Currently in progress</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Avg. Agreement</span>
+                    <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                </div>
+                <div class="stat-value" id="avgAgreement">-</div>
+                <div class="stat-subtitle">Average score alignment</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Participants</span>
+                    <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </div>
+                <div class="stat-value" id="totalParticipants">-</div>
+                <div class="stat-subtitle">Total auditors involved</div>
+            </div>
+        </div>
+
+        <!-- Controls Section -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; gap: 0.5625rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.375rem; flex: 1; min-width: 200px;">
+                <input type="text" id="searchInput" placeholder="Search sessions..." style="flex: 1; padding: 0.2812rem 0.375rem; border: 0.0469rem solid #d1d5db; border-radius: 0.1875rem; font-size: 0.6094rem; font-family: 'Poppins', sans-serif; background-color: white; transition: all 0.2s ease;" onfocus="this.style.borderColor='var(--primary-color)'; this.style.outline='none';" onblur="this.style.borderColor='#d1d5db';">
+                <button onclick="toggleFilters()" style="padding: 0.2812rem 0.375rem; background: transparent; border: 0.0469rem solid #d1d5db; border-radius: 0.1875rem; font-size: 0.6094rem; color: #6b7280; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 0.2812rem;" onmouseover="this.style.borderColor='#9ca3af'; this.style.color='#374151';" onmouseout="this.style.borderColor='#d1d5db'; this.style.color='#6b7280';">
+                    <svg width="0.6562rem" height="0.6562rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                    </svg>
+                    Filters
+                </button>
+            </div>
+            <button class="btn-primary" onclick="openCreateSessionModal()">
+                <svg width="0.75rem" height="0.75rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Create Session
+            </button>
+        </div>
+
+        <div class="filter-panel" id="filterPanel" style="margin-bottom: 0.75rem;">
+            <div class="filter-grid" style="grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: 0.375rem; margin-bottom: 0.375rem;">
+                <div class="filter-group">
+                    <label class="filter-label">Status</label>
+                    <select id="statusFilter" class="filter-select">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="active">Active</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Scorecard</label>
+                    <select id="scorecardFilter" class="filter-select">
+                        <option value="">All Scorecards</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">From Date</label>
+                    <input type="date" id="dateFromFilter" class="filter-input">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">To Date</label>
+                    <input type="date" id="dateToFilter" class="filter-input">
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.2812rem;">
+                <button onclick="applyFilters()" style="padding: 0.2812rem 0.5625rem; background: transparent; border: 0.0469rem solid #d1d5db; border-radius: 0.1875rem; font-size: 0.6094rem; color: #6b7280; cursor: pointer; transition: all 0.2s ease; font-weight: 500;" onmouseover="this.style.borderColor='#9ca3af'; this.style.color='#374151'; this.style.backgroundColor='#f9fafb';" onmouseout="this.style.borderColor='#d1d5db'; this.style.color='#6b7280'; this.style.backgroundColor='transparent';">
+                    Apply
+                </button>
+                <button onclick="clearFilters()" style="padding: 0.2812rem 0.5625rem; background: transparent; border: 0.0469rem solid #d1d5db; border-radius: 0.1875rem; font-size: 0.6094rem; color: #6b7280; cursor: pointer; transition: all 0.2s ease; font-weight: 500;" onmouseover="this.style.borderColor='#9ca3af'; this.style.color='#374151'; this.style.backgroundColor='#f9fafb';" onmouseout="this.style.borderColor='#d1d5db'; this.style.color='#6b7280'; this.style.backgroundColor='transparent';">
+                    Clear
+                </button>
+            </div>
+        </div>
+
+        <!-- My Calibration Sessions (For Participants) -->
+        <div class="section-card" id="myCalibrationSessionsSection" style="display: none;">
+            <div class="section-header">
+                <div class="section-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    My Calibration Sessions
+                </div>
+                <span id="mySessionsCount" style="font-size: 0.6094rem; color: #6b7280; font-weight: 500;">0 sessions</span>
+            </div>
+
+            <div id="mySessionsList">
+                <div class="loading">Loading your calibration sessions...</div>
+            </div>
+        </div>
+
+        <!-- Calibration Sessions List (All Sessions - Admin View) -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    All Calibration Sessions
+                </div>
+                <span id="sessionsCount" style="font-size: 0.6094rem; color: #6b7280; font-weight: 500;">0 sessions</span>
+            </div>
+
+            <div id="sessionsList">
+                <div class="loading">Loading calibration sessions...</div>
+            </div>
+        </div>
+
+        <!-- Advanced Analytics Section -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 3v18h18"/>
+                        <path d="M18 17V9"/>
+                        <path d="M13 17V5"/>
+                        <path d="M8 17v-3"/>
+                    </svg>
+                    Advanced Analytics: Pre vs Post-Calibration
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn-secondary" onclick="exportAnalyticsData()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Export
+                    </button>
+                    <button class="btn-primary" onclick="refreshAnalytics()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"/>
+                            <polyline points="1 20 1 14 7 14"/>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                        </svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Analytics Filters -->
+            <div class="mb-4 p-3 bg-gray-50 rounded border border-gray-200">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Date Range (From)</label>
+                        <input type="date" id="analyticsDateFrom" class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Date Range (To)</label>
+                        <input type="date" id="analyticsDateTo" class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Scorecard</label>
+                        <select id="analyticsScorecardFilter" class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="">All Scorecards</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Auditor</label>
+                        <select id="analyticsAuditorFilter" class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="">All Auditors</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-3 flex gap-2">
+                    <button onclick="applyAnalyticsFilters()" class="px-3 py-1 text-xs font-semibold bg-primary text-white rounded hover:bg-primary-dark transition">Apply Filters</button>
+                    <button onclick="clearAnalyticsFilters()" class="px-3 py-1 text-xs font-semibold bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Clear</button>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="analyticsLoading" class="text-center py-8 text-gray-500">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p class="mt-2 text-sm">Loading analytics data...</p>
+            </div>
+
+            <!-- Analytics Content -->
+            <div id="analyticsContent" class="hidden">
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="text-xs font-semibold text-blue-700 uppercase mb-1">Pre-Calibration Audits</div>
+                        <div class="text-2xl font-bold text-blue-900" id="preCalibrationCount">0</div>
+                        <div class="text-xs text-blue-600 mt-1">Total regular audits analyzed</div>
+                    </div>
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="text-xs font-semibold text-green-700 uppercase mb-1">Post-Calibration Sessions</div>
+                        <div class="text-2xl font-bold text-green-900" id="postCalibrationCount">0</div>
+                        <div class="text-xs text-green-600 mt-1">Total calibration results</div>
+                    </div>
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <div class="text-xs font-semibold text-purple-700 uppercase mb-1">Avg Agreement Rate</div>
+                        <div class="text-2xl font-bold text-purple-900" id="avgAgreementRate">-</div>
+                        <div class="text-xs text-purple-600 mt-1">Inter-auditor agreement</div>
+                    </div>
+                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <div class="text-xs font-semibold text-orange-700 uppercase mb-1">Auditors Analyzed</div>
+                        <div class="text-2xl font-bold text-orange-900" id="auditorsAnalyzed">0</div>
+                        <div class="text-xs text-orange-600 mt-1">Unique auditors in comparison</div>
+                    </div>
+                </div>
+
+                <!-- Comparison Table -->
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-gray-800 mb-3">Auditor Performance Comparison</h3>
+                    <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200 text-xs">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-semibold text-gray-700 sticky left-0 bg-gray-50 z-10">Auditor</th>
+                                    <th class="px-4 py-3 text-center font-semibold text-gray-700 border-l-2 border-blue-300 bg-blue-50" colspan="4">Pre-Calibration</th>
+                                    <th class="px-4 py-3 text-center font-semibold text-gray-700 border-l-2 border-green-300 bg-green-50" colspan="4">Post-Calibration</th>
+                                    <th class="px-4 py-3 text-center font-semibold text-gray-700 border-l-2 border-purple-300 bg-purple-50" colspan="3">Change</th>
+                                </tr>
+                                <tr>
+                                    <th class="px-4 py-2 text-left font-medium text-gray-600 sticky left-0 bg-gray-50 z-10"></th>
+                                    <!-- Pre-Calibration Headers -->
+                                    <th class="px-3 py-2 text-center font-medium text-gray-600 bg-blue-50">Avg Score</th>
+                                    <th class="px-3 py-2 text-center font-medium text-gray-600 bg-blue-50">Variance</th>
+                                    <th class="px-3 py-2 text-center font-medium text-gray-600 bg-blue-50">Consistency</th>
+                                    <th class="px-3 py-2 text-center font-medium text-gray-600 bg-blue-50">Count</th>
+                                    <!-- Post-Calibration Headers -->
+                                    <th class="px-3 py-2 text-center font-medium text-gray-600 bg-green-50 border-l-2 border-green-300">Avg Score</th>
+                                    <th class="px-3 py-2 text-center font-medium text-gray-600 bg-green-50">Variance</th>
+                                    <th class="px-3 py-2 text-center font-medium text-gray-600 bg-green-50">Consistency</th>
+                                    <th class="px-3 py-2 text-center font-medium text-gray-600 bg-green-50">Count</th>
+                                    <!-- Change Headers -->
+                                    <th class="px-3 py-2 text-center font-medium text-gray-600 bg-purple-50 border-l-2 border-purple-300">Score Δ</th>
+                                    <th class="px-3 py-2 text-center font-medium text-gray-600 bg-purple-50">Variance Δ</th>
+                                    <th class="px-3 py-2 text-center font-medium text-gray-600 bg-purple-50">Trend</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comparisonTableBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Table rows will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Inter-Auditor Agreement Chart -->
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-gray-800 mb-3">Inter-Auditor Agreement Over Time</h3>
+                    <div class="bg-white border border-gray-200 rounded-lg p-4" style="height: 300px;">
+                        <canvas id="agreementChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Agreement Details Table -->
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-800 mb-3">Session Agreement Details</h3>
+                    <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200 text-xs">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-semibold text-gray-700">Session</th>
+                                    <th class="px-4 py-3 text-center font-semibold text-gray-700">Participants</th>
+                                    <th class="px-4 py-3 text-center font-semibold text-gray-700">Avg Score</th>
+                                    <th class="px-4 py-3 text-center font-semibold text-gray-700">Score Spread</th>
+                                    <th class="px-4 py-3 text-center font-semibold text-gray-700">Agreement Rate</th>
+                                    <th class="px-4 py-3 text-center font-semibold text-gray-700">Consensus Level</th>
+                                </tr>
+                            </thead>
+                            <tbody id="agreementTableBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Table rows will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="analyticsEmpty" class="hidden text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No analytics data available</h3>
+                <p class="mt-1 text-sm text-gray-500">Complete some calibration sessions to see analytics.</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Create Session Modal -->
+<div id="createSessionModal" class="modal">
+    <div class="modal-content" style="max-width: 42rem;">
+        <div class="modal-header">
+            <h3>Create Calibration Session</h3>
+            <button class="modal-close" onclick="closeCreateSessionModal()" title="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="createSessionForm">
+                <div class="form-group">
+                    <label for="sessionName">Session Name *</label>
+                    <input type="text" id="sessionName" required placeholder="e.g., Q1 2024 Calibration Session">
+                </div>
+                <div class="form-group">
+                    <label for="sessionScorecard">Scorecard *</label>
+                    <select id="sessionScorecard" required>
+                        <option value="">Select Scorecard</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Sample Source *</label>
+                    <div style="display: flex; gap: 1.5rem; margin-bottom: 0.75rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                            <input type="radio" name="sampleSource" value="audit" id="sampleSourceAudit" checked onchange="toggleSampleSource()" style="width: 1.125rem; height: 1.125rem;">
+                            <span>Existing Audit</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                            <input type="radio" name="sampleSource" value="interaction" id="sampleSourceInteraction" onchange="toggleSampleSource()" style="width: 1.125rem; height: 1.125rem;">
+                            <span>Specific Interaction ID</span>
+                        </label>
+                    </div>
+                    <div id="sampleAuditContainer">
+                        <select id="sessionAudit">
+                            <option value="">Select Audit</option>
+                        </select>
+                        <small style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; display: block;">
+                            Select a scorecard first, then choose an existing completed audit to use as the calibration sample
+                        </small>
+                    </div>
+                    <div id="sampleInteractionContainer" style="display: none;">
+                        <input type="text" id="sessionInteractionId" placeholder="Enter Interaction ID (e.g., 12345678)">
+                        <small style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; display: block;">
+                            Enter a specific Interaction ID from Intercom to use as the calibration sample
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="sessionDescription">Description</label>
+                    <textarea id="sessionDescription" rows="4" placeholder="Optional description or notes for this calibration session"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Participants (Quality Analysts) *</label>
+                    <div class="participant-list" id="participantsList">
+                        <div class="loading">Loading participants...</div>
+                    </div>
+                    <small style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; display: block;">
+                        Select Quality Analysts who will participate in this calibration
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label for="sessionDeadline">Deadline</label>
+                    <input type="datetime-local" id="sessionDeadline">
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeCreateSessionModal()">Cancel</button>
+            <button type="button" class="btn-primary" onclick="createCalibrationSession()">Create Session</button>
+        </div>
+    </div>
+</div>
+
+<!-- View Session Details Modal -->
+<div id="viewSessionModal" class="modal">
+    <div class="modal-content" style="max-width: 95vw; max-width: 80rem;">
+        <div class="modal-header">
+            <h3 id="viewSessionTitle">Calibration Session Details</h3>
+            <button class="modal-close" onclick="closeViewSessionModal()" title="Close">&times;</button>
+        </div>
+        <div class="modal-body" id="viewSessionBody">
+            <!-- Session details will be loaded here -->
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeViewSessionModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- View My Calibration Result Modal -->
+<div id="viewMyResultModal" class="modal">
+    <div class="modal-content" style="max-width: 95vw; max-width: 80rem;">
+        <div class="modal-header">
+            <h3 id="viewMyResultTitle">My Calibration Result</h3>
+            <button class="modal-close" onclick="closeViewMyResultModal()" title="Close">&times;</button>
+        </div>
+        <div class="modal-body" id="viewMyResultBody">
+            <!-- Result details will be loaded here -->
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeViewMyResultModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Calibration Audit Form Modal -->
+<div id="calibrationAuditFormModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; display: none; align-items: flex-start; justify-content: center; padding: 0; overflow-y: auto;">
+    <form id="calibrationAuditForm" method="POST" style="background: white; width: 100%; min-height: 100vh; display: flex; flex-direction: column; gap: 0; padding: 0; margin: 0;">
+        <!-- Form will be loaded dynamically from create-audit.html structure -->
+        <!-- This is a placeholder - we'll populate it when starting calibration -->
+        <div style="padding: 2rem; text-align: center;">
+            <p>Loading calibration audit form...</p>
+        </div>
+    </form>
+</div>
+
+<script>
+// Global variables
+let allSessions = [];
+let filteredSessions = [];
+let allScorecards = [];
+let allAudits = [];
+let allQualityAnalysts = [];
+let currentUserEmail = '';
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', async function() {
+    // Check page access using centralized access control
+    if (!window.accessControl || !window.accessControl.enforcePageAccess('calibration.html')) {
+        return; // Access denied, user will be redirected
+    }
+    
+    await initializeCalibration();
+});
+
+async function initializeCalibration() {
+    try {
+        // Wait for Supabase
+        let attempts = 0;
+        while (!window.supabaseClient && attempts < 50) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+
+        if (!window.supabaseClient) {
+            console.error('Supabase client not initialized');
+            return;
+        }
+
+        // Get current user
+        const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+        currentUserEmail = userInfo.email;
+
+        // Load initial data
+        await loadScorecards();
+        await loadQualityAnalysts();
+        await loadCalibrationSessions();
+        await loadMyCalibrationSessions(); // Load sessions assigned to current user
+        updateStatistics();
+        
+        // Initialize analytics after main data is loaded
+        initializeAnalytics();
+
+        // Setup event listeners
+        document.getElementById('searchInput')?.addEventListener('input', filterSessions);
+        document.getElementById('statusFilter')?.addEventListener('change', filterSessions);
+        document.getElementById('scorecardFilter')?.addEventListener('change', filterSessions);
+        document.getElementById('dateFromFilter')?.addEventListener('change', filterSessions);
+        document.getElementById('dateToFilter')?.addEventListener('change', filterSessions);
+
+    } catch (error) {
+        console.error('Error initializing calibration:', error);
+    }
+}
+
+async function loadScorecards() {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('scorecards')
+            .select('id, name, table_name')
+            .eq('is_active', true)
+            .order('name', { ascending: true });
+
+        if (error) throw error;
+
+        allScorecards = data || [];
+        
+        // Populate scorecard filter
+        const scorecardFilter = document.getElementById('scorecardFilter');
+        if (scorecardFilter) {
+            scorecardFilter.innerHTML = '<option value="">All Scorecards</option>';
+            allScorecards.forEach(scorecard => {
+                const option = document.createElement('option');
+                option.value = scorecard.id;
+                option.textContent = scorecard.name;
+                scorecardFilter.appendChild(option);
+            });
+        }
+
+        // Populate create session scorecard dropdown
+        const sessionScorecard = document.getElementById('sessionScorecard');
+        if (sessionScorecard) {
+            sessionScorecard.innerHTML = '<option value="">Select Scorecard</option>';
+            allScorecards.forEach(scorecard => {
+                const option = document.createElement('option');
+                option.value = scorecard.id;
+                option.textContent = scorecard.name;
+                sessionScorecard.appendChild(option);
+            });
+            
+            // Attach event listener for scorecard change
+            setupScorecardChangeListener();
+        }
+
+    } catch (error) {
+        console.error('Error loading scorecards:', error);
+    }
+}
+
+// Global flag to prevent duplicate listeners
+let scorecardChangeListenerAttached = false;
+
+function setupScorecardChangeListener() {
+    const sessionScorecard = document.getElementById('sessionScorecard');
+    if (!sessionScorecard || scorecardChangeListenerAttached) return;
+    
+    // Attach event listener
+    sessionScorecard.addEventListener('change', handleScorecardChange);
+    scorecardChangeListenerAttached = true;
+}
+
+async function handleScorecardChange(event) {
+    const scorecardId = event.target.value;
+    const auditSelect = document.getElementById('sessionAudit');
+    
+    if (!auditSelect) return;
+    
+    if (!scorecardId) {
+        auditSelect.innerHTML = '<option value="">Select a scorecard first</option>';
+        auditSelect.disabled = true;
+        auditSelect.removeAttribute('required');
+        return;
+    }
+
+    auditSelect.disabled = true;
+    auditSelect.removeAttribute('required');
+    auditSelect.innerHTML = '<option value="">Loading audits...</option>';
+    
+    try {
+        const audits = await loadAuditsForScorecard(scorecardId);
+        
+        auditSelect.innerHTML = '<option value="">Select Audit</option>';
+        
+        if (audits.length === 0) {
+            const noAuditsOption = document.createElement('option');
+            noAuditsOption.value = '';
+            noAuditsOption.textContent = 'No completed audits found for this scorecard';
+            noAuditsOption.disabled = true;
+            auditSelect.appendChild(noAuditsOption);
+            auditSelect.disabled = true;
+            auditSelect.removeAttribute('required');
+            return;
+        }
+        
+        audits.forEach(audit => {
+            const option = document.createElement('option');
+            option.value = audit.id;
+            const employeeName = audit.employee_name || audit.employee_email || 'Unknown';
+            const submitDate = audit.submitted_at ? new Date(audit.submitted_at).toLocaleDateString() : 'N/A';
+            // Use average_score, fallback to final_score or score if available
+            const score = audit.average_score !== null && audit.average_score !== undefined 
+                ? `${audit.average_score}%` 
+                : (audit.final_score !== null && audit.final_score !== undefined
+                    ? `${audit.final_score}%`
+                    : (audit.score !== null && audit.score !== undefined
+                        ? `${audit.score}%`
+                        : 'N/A'));
+            option.textContent = `${employeeName} - ${submitDate}${score !== 'N/A' ? ' (Score: ' + score + ')' : ''}`;
+            auditSelect.appendChild(option);
+        });
+        
+        auditSelect.disabled = false;
+        auditSelect.setAttribute('required', 'required');
+        
+    } catch (error) {
+        console.error('Error loading audits:', error);
+        auditSelect.innerHTML = '<option value="">Error loading audits - ' + error.message + '</option>';
+        auditSelect.disabled = true;
+        auditSelect.removeAttribute('required');
+    }
+}
+
+async function loadQualityAnalysts() {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('users')
+            .select('email, name')
+            .eq('role', 'Quality Analyst')
+            .eq('is_active', true)
+            .order('name', { ascending: true });
+
+        if (error) throw error;
+
+        allQualityAnalysts = data || [];
+        populateParticipantsList();
+
+    } catch (error) {
+        console.error('Error loading quality analysts:', error);
+    }
+}
+
+function populateParticipantsList() {
+    const participantsList = document.getElementById('participantsList');
+    if (!participantsList) return;
+
+    if (allQualityAnalysts.length === 0) {
+        participantsList.innerHTML = '<div style="text-align: center; padding: 0.75rem; color: #6b7280; font-size: 0.5625rem;">No Quality Analysts found</div>';
+        return;
+    }
+
+    participantsList.innerHTML = allQualityAnalysts.map(analyst => `
+        <div class="participant-item">
+            <input type="checkbox" id="participant_${analyst.email}" value="${analyst.email}" class="participant-checkbox">
+            <label for="participant_${analyst.email}" style="cursor: pointer; flex: 1; font-size: 0.5625rem;">
+                ${escapeHtml(analyst.name || analyst.email)}
+            </label>
+        </div>
+    `).join('');
+}
+
+async function loadCalibrationSessions() {
+    try {
+        // Note: This assumes a 'calibration_sessions' table exists in Supabase
+        // If not, you'll need to create it with fields: id, name, scorecard_id, audit_id, 
+        // status, created_by, created_at, deadline, description, participants (JSON array)
+        
+        const { data, error } = await window.supabaseClient
+            .from('calibration_sessions')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            // If table doesn't exist, show empty state
+            if (error.code === 'PGRST116') {
+                console.warn('calibration_sessions table does not exist');
+                allSessions = [];
+                filteredSessions = [];
+                renderSessions();
+                return;
+            }
+            throw error;
+        }
+
+        allSessions = data || [];
+        filteredSessions = [...allSessions];
+        renderSessions();
+
+    } catch (error) {
+        console.error('Error loading calibration sessions:', error);
+        document.getElementById('sessionsList').innerHTML = 
+            '<div class="loading" style="color: #ef4444;">Error loading sessions: ' + error.message + '</div>';
+    }
+}
+
+function renderSessions() {
+    const sessionsList = document.getElementById('sessionsList');
+    if (!sessionsList) return;
+
+    if (filteredSessions.length === 0) {
+        sessionsList.innerHTML = `
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <p style="font-size: 0.6562rem; font-weight: 500; margin-bottom: 0.375rem;">No calibration sessions found</p>
+                <p style="font-size: 0.5625rem; color: #9ca3af;">Create your first calibration session to get started</p>
+            </div>
+        `;
+        return;
+    }
+
+    sessionsList.innerHTML = filteredSessions.map(session => {
+        const scorecard = allScorecards.find(s => s.id === session.scorecard_id);
+        const participants = Array.isArray(session.participants) ? session.participants : [];
+        const status = session.status || 'pending';
+        
+        const statusClass = {
+            'active': 'status-active',
+            'completed': 'status-completed',
+            'pending': 'status-pending'
+        }[status] || 'status-pending';
+
+        const statusText = {
+            'active': 'Active',
+            'completed': 'Completed',
+            'pending': 'Pending'
+        }[status] || 'Pending';
+
+        return `
+            <div class="calibration-session-card" onclick="viewSessionDetails('${session.id}')" style="position: relative;">
+                <div class="session-header">
+                    <div class="session-info">
+                        <div class="session-title">${escapeHtml(session.name || 'Unnamed Session')}</div>
+                        <div class="session-meta">
+                            <div class="session-meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6"/>
+                                    <line x1="8" y1="2" x2="8" y2="6"/>
+                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                                <span>${escapeHtml(scorecard?.name || 'Unknown')}</span>
+                            </div>
+                            <div class="session-meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                                <span>${new Date(session.created_at).toLocaleDateString()}</span>
+                            </div>
+                            ${session.deadline ? `
+                            <div class="session-meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                                <span>Due: ${new Date(session.deadline).toLocaleDateString()}</span>
+                            </div>
+                            ` : ''}
+                            <div class="session-meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                                <span>${participants.length} participant${participants.length !== 1 ? 's' : ''}</span>
+                            </div>
+                        </div>
+                        ${participants.length > 0 ? `
+                        <div class="session-participants">
+                            ${participants.slice(0, 5).map(email => {
+                                const analyst = allQualityAnalysts.find(a => a.email === email);
+                                return `<span class="participant-badge">${escapeHtml(analyst?.name || email)}</span>`;
+                            }).join('')}
+                            ${participants.length > 5 ? `<span class="participant-badge">+${participants.length - 5} more</span>` : ''}
+                        </div>
+                        ` : ''}
+                    </div>
+                    <span class="session-status ${statusClass}">${statusText}</span>
+                </div>
+                ${status === 'active' && session.deadline ? `
+                    <div style="margin-top: 0.75rem; padding: 0.625rem 0.875rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 0.5rem; font-size: 0.8125rem; color: #166534; display: flex; align-items: center; gap: 0.5rem;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <span><strong>Time Remaining:</strong> <span id="timer-${session.id}" style="font-weight: 600;">Calculating...</span></span>
+                    </div>
+                ` : ''}
+                <div class="session-actions" onclick="event.stopPropagation();">
+                    <button class="btn-primary btn-small" onclick="viewSessionDetails('${session.id}')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 0.25rem;">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        View Details
+                    </button>
+                    ${status === 'active' ? `
+                        <button class="btn-secondary btn-small" onclick="event.stopPropagation(); completeSession('${session.id}')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 0.25rem;">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            Complete
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    document.getElementById('sessionsCount').textContent = `${filteredSessions.length} session${filteredSessions.length !== 1 ? 's' : ''}`;
+    
+    // Start countdown timers for active sessions with deadlines
+    filteredSessions.forEach(session => {
+        if (session.status === 'active' && session.deadline) {
+            updateDeadlineTimer(session.id, session.deadline);
+        }
+    });
+}
+
+// Update deadline countdown timer
+function updateDeadlineTimer(timerId, deadline) {
+    const timerElement = document.getElementById(timerId);
+    if (!timerElement) return;
+    
+    const deadlineDate = new Date(deadline);
+    const now = new Date();
+    const diff = deadlineDate - now;
+    
+    if (diff <= 0) {
+        timerElement.textContent = 'Expired';
+        timerElement.style.color = '#ef4444';
+        return;
+    }
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    let timeString = '';
+    if (days > 0) {
+        timeString = `${days}d ${hours}h ${minutes}m`;
+    } else if (hours > 0) {
+        timeString = `${hours}h ${minutes}m ${seconds}s`;
+    } else if (minutes > 0) {
+        timeString = `${minutes}m ${seconds}s`;
+    } else {
+        timeString = `${seconds}s`;
+    }
+    
+    timerElement.textContent = timeString;
+    
+    // Update every second
+    setTimeout(() => updateDeadlineTimer(timerId, deadline), 1000);
+}
+
+// Load calibration sessions assigned to current user
+let myCalibrationSessions = [];
+
+async function loadMyCalibrationSessions() {
+    try {
+        if (!currentUserEmail) return;
+        
+        // Get all sessions where current user is a participant
+        const { data, error } = await window.supabaseClient
+            .from('calibration_sessions')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            if (error.code === 'PGRST116') {
+                myCalibrationSessions = [];
+                renderMySessions();
+                return;
+            }
+            throw error;
+        }
+
+        // Filter sessions where user is a participant
+        myCalibrationSessions = (data || []).filter(session => {
+            const participants = Array.isArray(session.participants) ? session.participants : [];
+            return participants.includes(currentUserEmail);
+        });
+
+        renderMySessions();
+
+    } catch (error) {
+        console.error('Error loading my calibration sessions:', error);
+        const mySessionsList = document.getElementById('mySessionsList');
+        if (mySessionsList) {
+            mySessionsList.innerHTML = 
+                '<div class="loading" style="color: #ef4444;">Error loading sessions: ' + error.message + '</div>';
+        }
+    }
+}
+
+function renderMySessions() {
+    const mySessionsList = document.getElementById('mySessionsList');
+    const mySessionsSection = document.getElementById('myCalibrationSessionsSection');
+    
+    if (!mySessionsList || !mySessionsSection) return;
+
+    // Show section if user has assigned sessions
+    if (myCalibrationSessions.length > 0) {
+        mySessionsSection.style.display = 'block';
+    } else {
+        mySessionsSection.style.display = 'none';
+        return;
+    }
+
+    // Check which sessions user has already submitted
+    loadMyCalibrationResults().then(results => {
+        const submittedSessionIds = new Set((results || []).map(r => r.calibration_session_id));
+
+        if (myCalibrationSessions.length === 0) {
+            mySessionsList.innerHTML = `
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    <p style="font-size: 0.6562rem; font-weight: 500; margin-bottom: 0.375rem;">No calibration sessions assigned</p>
+                    <p style="font-size: 0.5625rem; color: #9ca3af;">You will see sessions here when you are assigned as a participant</p>
+                </div>
+            `;
+            return;
+        }
+
+        mySessionsList.innerHTML = myCalibrationSessions.map(session => {
+            const scorecard = allScorecards.find(s => s.id === session.scorecard_id);
+            const status = session.status || 'pending';
+            const isSubmitted = submittedSessionIds.has(session.id);
+            
+            const statusClass = {
+                'active': 'status-active',
+                'completed': 'status-completed',
+                'pending': 'status-pending'
+            }[status] || 'status-pending';
+
+            const statusText = {
+                'active': 'Active',
+                'completed': 'Completed',
+                'pending': 'Pending'
+            }[status] || 'Pending';
+
+            return `
+                <div class="calibration-session-card" onclick="viewSessionDetails('${session.id}')" style="position: relative;">
+                    <div class="session-header">
+                        <div class="session-info">
+                            <div class="session-title">${escapeHtml(session.name || 'Unnamed Session')}</div>
+                            <div class="session-meta">
+                                <div class="session-meta-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                        <line x1="16" y1="2" x2="16" y2="6"/>
+                                        <line x1="8" y1="2" x2="8" y2="6"/>
+                                        <line x1="3" y1="10" x2="21" y2="10"/>
+                                    </svg>
+                                    <span>${escapeHtml(scorecard?.name || 'Unknown')}</span>
+                                </div>
+                                <div class="session-meta-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polyline points="12 6 12 12 16 14"/>
+                                    </svg>
+                                    <span>${new Date(session.created_at).toLocaleDateString()}</span>
+                                </div>
+                                ${session.deadline ? `
+                                <div class="session-meta-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polyline points="12 6 12 12 16 14"/>
+                                    </svg>
+                                    <span>Due: ${new Date(session.deadline).toLocaleDateString()}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                            ${session.description ? `<div style="font-size: 0.8125rem; color: #6b7280; margin-top: 0.5rem; line-height: 1.5; padding-top: 0.5rem; border-top: 1px solid #f3f4f6;">${escapeHtml(session.description)}</div>` : ''}
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; flex-shrink: 0;">
+                            <span class="session-status ${statusClass}">${statusText}</span>
+                            ${isSubmitted ? '<span style="font-size: 0.75rem; color: #10b981; font-weight: 600; display: flex; align-items: center; gap: 0.25rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Submitted</span>' : ''}
+                        </div>
+                    </div>
+                    ${status === 'active' && session.deadline ? `
+                        <div style="margin-top: 0.75rem; padding: 0.625rem 0.875rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 0.5rem; font-size: 0.8125rem; color: #166534; display: flex; align-items: center; gap: 0.5rem;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            <span><strong>Time Remaining:</strong> <span id="my-timer-${session.id}" style="font-weight: 600;">Calculating...</span></span>
+                        </div>
+                    ` : ''}
+                    <div class="session-actions" onclick="event.stopPropagation();">
+                        ${status === 'active' && !isSubmitted ? `
+                            <button class="btn-primary btn-small" onclick="startCalibration('${session.id}')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 0.25rem;">
+                                    <polygon points="5 3 19 12 5 21 5 3"/>
+                                </svg>
+                                Start Calibration
+                            </button>
+                        ` : ''}
+                        ${status === 'active' && isSubmitted ? `
+                            <button class="btn-secondary btn-small" onclick="viewMyCalibrationResult('${session.id}')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 0.25rem;">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                View Submission
+                            </button>
+                        ` : ''}
+                        ${status === 'pending' ? `
+                            <span style="font-size: 0.8125rem; color: #9ca3af; padding: 0.5rem 0;">Waiting for activation...</span>
+                        ` : ''}
+                        ${status === 'completed' ? `
+                            <span style="font-size: 0.8125rem; color: #6b7280; padding: 0.5rem 0;">Session completed</span>
+                        ` : ''}
+                        <button class="btn-secondary btn-small" onclick="viewSessionDetails('${session.id}')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 0.25rem;">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        document.getElementById('mySessionsCount').textContent = `${myCalibrationSessions.length} session${myCalibrationSessions.length !== 1 ? 's' : ''}`;
+    });
+    
+    // Start countdown timers for active sessions with deadlines
+    myCalibrationSessions.forEach(session => {
+        if (session.status === 'active' && session.deadline) {
+            updateDeadlineTimer(`my-timer-${session.id}`, session.deadline);
+        }
+    });
+}
+
+async function loadMyCalibrationResults() {
+    try {
+        if (!currentUserEmail) return [];
+        
+        const { data, error } = await window.supabaseClient
+            .from('calibration_results')
+            .select('calibration_session_id, submitted_at')
+            .eq('participant_email', currentUserEmail);
+
+        if (error) {
+            if (error.code === 'PGRST116') return [];
+            throw error;
+        }
+
+        return data || [];
+    } catch (error) {
+        console.error('Error loading my calibration results:', error);
+        return [];
+    }
+}
+
+function updateStatistics() {
+    const totalSessions = allSessions.length;
+    const activeSessions = allSessions.filter(s => s.status === 'active').length;
+    const completedSessions = allSessions.filter(s => s.status === 'completed');
+    
+    // Calculate average agreement (mock calculation - would need actual calibration results)
+    let avgAgreement = '-';
+    if (completedSessions.length > 0) {
+        // This would calculate from actual calibration results
+        avgAgreement = '85%'; // Placeholder
+    }
+
+    // Count unique participants
+    const allParticipants = new Set();
+    allSessions.forEach(session => {
+        if (Array.isArray(session.participants)) {
+            session.participants.forEach(email => allParticipants.add(email));
+        }
+    });
+
+    document.getElementById('totalSessions').textContent = totalSessions;
+    document.getElementById('activeSessions').textContent = activeSessions;
+    document.getElementById('avgAgreement').textContent = avgAgreement;
+    document.getElementById('totalParticipants').textContent = allParticipants.size;
+}
+
+function toggleFilters() {
+    const panel = document.getElementById('filterPanel');
+    if (panel) {
+        panel.classList.toggle('active');
+    }
+}
+
+function filterSessions() {
+    const searchTerm = (document.getElementById('searchInput')?.value || '').toLowerCase();
+    const statusFilter = document.getElementById('statusFilter')?.value || '';
+    const scorecardFilter = document.getElementById('scorecardFilter')?.value || '';
+    const dateFrom = document.getElementById('dateFromFilter')?.value || '';
+    const dateTo = document.getElementById('dateToFilter')?.value || '';
+
+    filteredSessions = allSessions.filter(session => {
+        const matchesSearch = !searchTerm || 
+            (session.name && session.name.toLowerCase().includes(searchTerm)) ||
+            (session.description && session.description.toLowerCase().includes(searchTerm));
+
+        const matchesStatus = !statusFilter || session.status === statusFilter;
+        const matchesScorecard = !scorecardFilter || session.scorecard_id === scorecardFilter;
+
+        let matchesDate = true;
+        if (dateFrom || dateTo) {
+            const sessionDate = new Date(session.created_at);
+            if (dateFrom && sessionDate < new Date(dateFrom)) matchesDate = false;
+            if (dateTo && sessionDate > new Date(dateTo)) matchesDate = false;
+        }
+
+        return matchesSearch && matchesStatus && matchesScorecard && matchesDate;
+    });
+
+    renderSessions();
+}
+
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('scorecardFilter').value = '';
+    document.getElementById('dateFromFilter').value = '';
+    document.getElementById('dateToFilter').value = '';
+    filteredSessions = [...allSessions];
+    renderSessions();
+}
+
+function applyFilters() {
+    filterSessions();
+}
+
+async function loadAuditsForScorecard(scorecardId) {
+    try {
+        const scorecard = allScorecards.find(s => s.id === scorecardId);
+        if (!scorecard) {
+            console.error('Scorecard not found:', scorecardId);
+            return [];
+        }
+        
+        if (!scorecard.table_name) {
+            console.error('Scorecard missing table_name:', scorecard);
+            return [];
+        }
+
+        console.log('Loading audits from table:', scorecard.table_name);
+
+        // First, try to get a sample row to see what columns exist
+        // Then query with the correct columns
+        try {
+            // Try querying with all common columns first
+            let query = window.supabaseClient
+                .from(scorecard.table_name)
+                .select('id, employee_name, employee_email, submitted_at, average_score, status')
+                .not('submitted_at', 'is', null)
+                .order('submitted_at', { ascending: false })
+                .limit(100);
+
+            const { data, error } = await query;
+
+            if (error) {
+                console.error('Error querying audits:', error);
+                // If specific columns don't exist, try with just basic columns
+                if (error.message && (error.message.includes('column') || error.message.includes('does not exist'))) {
+                    console.log('Retrying with basic columns only...');
+                    
+                    // Try with minimal columns first
+                    const { data: basicData, error: basicError } = await window.supabaseClient
+                        .from(scorecard.table_name)
+                        .select('id, employee_name, employee_email, submitted_at')
+                        .not('submitted_at', 'is', null)
+                        .order('submitted_at', { ascending: false })
+                        .limit(100);
+                    
+                    if (basicError) {
+                        // If that fails, try selecting all columns
+                        console.log('Trying with select(*)...');
+                        const { data: allData, error: allError } = await window.supabaseClient
+                            .from(scorecard.table_name)
+                            .select('*')
+                            .not('submitted_at', 'is', null)
+                            .order('submitted_at', { ascending: false })
+                            .limit(100);
+                        
+                        if (allError) throw allError;
+                        
+                        // Map the data to include score from whatever column exists
+                        const mappedAudits = (allData || []).map(audit => ({
+                            id: audit.id,
+                            employee_name: audit.employee_name,
+                            employee_email: audit.employee_email,
+                            submitted_at: audit.submitted_at,
+                            average_score: audit.average_score || audit.final_score || audit.score || null,
+                            status: audit.status
+                        }));
+                        
+                        // Filter for completed audits
+                        const completedAudits = mappedAudits.filter(audit => {
+                            if (audit.status !== undefined) {
+                                return audit.status === 'completed' || audit.status === 'submitted';
+                            }
+                            return true; // If no status field, assume all with submitted_at are completed
+                        });
+                        
+                        console.log(`Found ${completedAudits.length} completed audits`);
+                        return completedAudits;
+                    }
+                    
+                    // Map basic data and add null scores
+                    const mappedBasicAudits = (basicData || []).map(audit => ({
+                        id: audit.id,
+                        employee_name: audit.employee_name,
+                        employee_email: audit.employee_email,
+                        submitted_at: audit.submitted_at,
+                        average_score: null,
+                        status: null
+                    }));
+                    
+                    console.log(`Found ${mappedBasicAudits.length} audits (no score column)`);
+                    return mappedBasicAudits;
+                }
+                throw error;
+            }
+
+            // Filter for completed audits if status field exists
+            const completedAudits = (data || []).filter(audit => {
+                // If status field exists, filter by it
+                if (audit.status !== undefined && audit.status !== null) {
+                    return audit.status === 'completed' || audit.status === 'submitted';
+                }
+                // Otherwise, assume all audits with submitted_at are completed
+                return true;
+            });
+
+            console.log(`Found ${completedAudits.length} completed audits`);
+            return completedAudits;
+
+        } catch (error) {
+            console.error('Error loading audits for scorecard:', error);
+            throw error;
+        }
+
+    } catch (error) {
+        console.error('Error loading audits for scorecard:', error);
+        throw error; // Re-throw to let caller handle it
+    }
+}
+
+// Modal functions
+function openCreateSessionModal() {
+    const modal = document.getElementById('createSessionModal');
+    if (modal) {
+        modal.classList.add('active');
+        
+        // Reset form
+        const form = document.getElementById('createSessionForm');
+        if (form) form.reset();
+        
+        // Reset scorecard dropdown
+        const scorecardSelect = document.getElementById('sessionScorecard');
+        if (scorecardSelect) {
+            scorecardSelect.value = '';
+        }
+        
+        // Reset and disable audit dropdown
+        const auditSelect = document.getElementById('sessionAudit');
+        if (auditSelect) {
+            auditSelect.innerHTML = '<option value="">Select a scorecard first</option>';
+            auditSelect.disabled = true;
+            auditSelect.removeAttribute('required');
+        }
+        
+        // Uncheck all participants
+        document.querySelectorAll('.participant-checkbox').forEach(cb => cb.checked = false);
+        
+        // Ensure event listener is attached (will skip if already attached)
+        setupScorecardChangeListener();
+    }
+}
+
+function closeCreateSessionModal() {
+    const modal = document.getElementById('createSessionModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+// Toggle between sample audit and interaction ID
+function toggleSampleSource() {
+    const sourceAudit = document.getElementById('sampleSourceAudit');
+    const sourceInteraction = document.getElementById('sampleSourceInteraction');
+    const auditContainer = document.getElementById('sampleAuditContainer');
+    const interactionContainer = document.getElementById('sampleInteractionContainer');
+    const auditSelect = document.getElementById('sessionAudit');
+    const interactionInput = document.getElementById('sessionInteractionId');
+    
+    if (sourceAudit && sourceAudit.checked) {
+        auditContainer.style.display = 'block';
+        interactionContainer.style.display = 'none';
+        if (auditSelect) auditSelect.setAttribute('required', 'required');
+        if (interactionInput) {
+            interactionInput.removeAttribute('required');
+            interactionInput.value = '';
+        }
+    } else if (sourceInteraction && sourceInteraction.checked) {
+        auditContainer.style.display = 'none';
+        interactionContainer.style.display = 'block';
+        if (auditSelect) auditSelect.removeAttribute('required');
+        if (interactionInput) interactionInput.setAttribute('required', 'required');
+    }
+}
+
+// Event listener is now set up in setupScorecardChangeListener() function
+// This ensures it's properly attached when the modal opens
+
+async function createCalibrationSession() {
+    const sessionName = document.getElementById('sessionName').value.trim();
+    const scorecardId = document.getElementById('sessionScorecard').value;
+    const description = document.getElementById('sessionDescription').value.trim();
+    const deadline = document.getElementById('sessionDeadline').value;
+    
+    // Check which source is selected
+    const sourceAudit = document.getElementById('sampleSourceAudit');
+    const sourceInteraction = document.getElementById('sampleSourceInteraction');
+    const auditId = document.getElementById('sessionAudit').value;
+    const interactionId = document.getElementById('sessionInteractionId').value.trim();
+
+    // Validation
+    if (!sessionName) {
+        alert('Please enter a session name');
+        return;
+    }
+    
+    if (!scorecardId) {
+        alert('Please select a scorecard');
+        return;
+    }
+    
+    // Validate based on selected source
+    if (sourceAudit && sourceAudit.checked) {
+        if (!auditId) {
+            alert('Please select a sample audit. If no audits are available, complete some audits first.');
+            return;
+        }
+    } else if (sourceInteraction && sourceInteraction.checked) {
+        if (!interactionId) {
+            alert('Please enter an Interaction ID');
+            return;
+        }
+    } else {
+        alert('Please select a sample source (Existing Audit or Interaction ID)');
+        return;
+    }
+
+    const selectedParticipants = Array.from(document.querySelectorAll('.participant-checkbox:checked'))
+        .map(cb => cb.value);
+
+    if (selectedParticipants.length === 0) {
+        alert('Please select at least one participant');
+        return;
+    }
+
+    try {
+        const sessionData = {
+            name: sessionName,
+            scorecard_id: scorecardId,
+            audit_id: sourceAudit && sourceAudit.checked ? auditId : null,
+            interaction_id: sourceInteraction && sourceInteraction.checked ? interactionId : null,
+            description: description || null,
+            deadline: deadline || null,
+            participants: selectedParticipants, // This will be stored as JSONB array
+            status: 'active', // Auto-activate on creation
+            created_by: currentUserEmail,
+            created_at: new Date().toISOString()
+        };
+
+        const { data, error } = await window.supabaseClient
+            .from('calibration_sessions')
+            .insert([sessionData])
+            .select();
+
+        if (error) {
+            // Check if table doesn't exist
+            if (error.code === 'PGRST116' || error.message.includes('schema cache') || error.message.includes('does not exist')) {
+                alert('The calibration_sessions table does not exist. Please run the SQL script to create it.\n\nCheck the file: create-calibration-sessions-table.sql\n\nOr contact your administrator to create the table.');
+                console.error('Table does not exist. SQL script available at: create-calibration-sessions-table.sql');
+                return;
+            }
+            throw error;
+        }
+
+        alert('Calibration session created successfully!');
+        closeCreateSessionModal();
+        await loadCalibrationSessions();
+        updateStatistics();
+
+    } catch (error) {
+        console.error('Error creating session:', error);
+        alert('Error creating session: ' + error.message);
+    }
+}
+
+async function viewSessionDetails(sessionId) {
+    const session = allSessions.find(s => s.id === sessionId) || myCalibrationSessions.find(s => s.id === sessionId);
+    if (!session) return;
+
+    const modal = document.getElementById('viewSessionModal');
+    const modalTitle = document.getElementById('viewSessionTitle');
+    const modalBody = document.getElementById('viewSessionBody');
+    const modalFooter = modal.querySelector('.modal-footer');
+
+    modalTitle.textContent = session.name || 'Calibration Session Details';
+    modal.setAttribute('data-session-id', sessionId);
+    modalBody.innerHTML = '<div class="text-center py-8"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div><p class="mt-2 text-sm text-gray-500">Loading session details...</p></div>';
+    
+    // Set footer buttons based on session status
+    if (modalFooter) {
+        if (session.status === 'active') {
+            modalFooter.innerHTML = `
+                <button type="button" class="btn-secondary" onclick="closeViewSessionModal()">Close</button>
+                <button type="button" class="btn-primary" onclick="completeSession('${session.id}')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 0.5rem; display: inline-block; vertical-align: middle;">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Complete Session
+                </button>
+            `;
+        } else {
+            modalFooter.innerHTML = `
+                <button type="button" class="btn-secondary" onclick="closeViewSessionModal()">Close</button>
+            `;
+        }
+    }
+    
+    modal.classList.add('active');
+
+    try {
+        const scorecard = allScorecards.find(s => s.id === session.scorecard_id);
+        
+        // Load calibration results
+        const { data: results, error } = await window.supabaseClient
+            .from('calibration_results')
+            .select('*')
+            .eq('calibration_session_id', sessionId)
+            .order('submitted_at', { ascending: false });
+
+        if (error && error.code !== 'PGRST116') {
+            throw error;
+        }
+
+        const calibrationResults = results || [];
+        const participants = Array.isArray(session.participants) ? session.participants : [];
+        
+        // Calculate agreement metrics
+        const scores = calibrationResults.map(r => parseFloat(r.average_score)).filter(s => !isNaN(s));
+        const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+        const scoreSpread = scores.length > 0 ? Math.max(...scores) - Math.min(...scores) : 0;
+        const stdDev = scores.length > 0 
+            ? Math.sqrt(scores.reduce((sum, score) => sum + Math.pow(score - avgScore, 2), 0) / scores.length)
+            : 0;
+        
+        const threshold = 5;
+        const withinThreshold = scores.filter(score => Math.abs(score - avgScore) <= threshold).length;
+        const agreementRate = scores.length > 0 ? (withinThreshold / scores.length) * 100 : 0;
+        const consensusLevel = Math.max(0, 100 - (stdDev * 5));
+
+        // Build results HTML with Tailwind CSS
+        modalBody.innerHTML = `
+            <!-- Session Info -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Status</label>
+                        <span class="inline-block px-2 py-1 text-xs font-semibold rounded ${
+                            session.status === 'active' ? 'bg-green-100 text-green-800' :
+                            session.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                            'bg-yellow-100 text-yellow-800'
+                        }">${session.status || 'Pending'}</span>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Scorecard</label>
+                        <div class="text-sm font-medium text-gray-900">${escapeHtml(scorecard?.name || 'Unknown')}</div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Created</label>
+                        <div class="text-sm text-gray-700">${new Date(session.created_at).toLocaleString()}</div>
+                    </div>
+                    ${session.deadline ? `
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Deadline</label>
+                        <div class="text-sm text-gray-700">${new Date(session.deadline).toLocaleString()}</div>
+                    </div>
+                    ` : ''}
+                </div>
+                ${session.description ? `
+                <div class="mt-3 pt-3 border-t border-blue-200">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Description</label>
+                    <div class="text-sm text-gray-700">${escapeHtml(session.description)}</div>
+                </div>
+                ` : ''}
+                <div class="mt-3 pt-3 border-t border-blue-200">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Participants</label>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        ${participants.map(email => {
+                            const analyst = allQualityAnalysts.find(a => a.email === email);
+                            const hasResult = calibrationResults.some(r => r.participant_email === email);
+                            return `
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
+                                    hasResult ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                                }">
+                                    ${hasResult ? '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>' : ''}
+                                    ${escapeHtml(analyst?.name || email)}
+                                </span>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Summary Cards -->
+            ${calibrationResults.length > 0 ? `
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 text-white shadow-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold opacity-90 uppercase tracking-wide">Avg Score</span>
+                        <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold">${avgScore.toFixed(1)}%</div>
+                    <div class="text-xs opacity-75 mt-1">${calibrationResults.length} submission${calibrationResults.length !== 1 ? 's' : ''}</div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-5 text-white shadow-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold opacity-90 uppercase tracking-wide">Agreement</span>
+                        <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold">${agreementRate.toFixed(1)}%</div>
+                    <div class="text-xs opacity-75 mt-1">${withinThreshold}/${scores.length} within ±5%</div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-5 text-white shadow-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold opacity-90 uppercase tracking-wide">Score Spread</span>
+                        <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold">${scoreSpread.toFixed(1)}%</div>
+                    <div class="text-xs opacity-75 mt-1">${scores.length > 0 ? Math.min(...scores).toFixed(1) : 0}% - ${scores.length > 0 ? Math.max(...scores).toFixed(1) : 0}%</div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-5 text-white shadow-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold opacity-90 uppercase tracking-wide">Consensus</span>
+                        <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold">${consensusLevel.toFixed(1)}%</div>
+                    <div class="text-xs opacity-75 mt-1">Std Dev: ${stdDev.toFixed(2)}</div>
+                </div>
+            </div>
+
+            <!-- Score Comparison Chart -->
+            <div class="mb-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    Score Comparison
+                </h3>
+                <div class="h-64">
+                    <canvas id="sessionScoreChart-${sessionId}"></canvas>
+                </div>
+            </div>
+
+            <!-- Detailed Results Table -->
+            <div class="mb-6 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        Participant Results
+                    </h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Participant</th>
+                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Score</th>
+                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Variance</th>
+                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Critical Errors</th>
+                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Submitted</th>
+                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            ${calibrationResults.map((result, index) => {
+                                const variance = Math.abs(parseFloat(result.average_score) - avgScore);
+                                const varianceClass = variance <= 5 ? 'bg-green-100 text-green-800' : 
+                                                    variance <= 10 ? 'bg-yellow-100 text-yellow-800' : 
+                                                    'bg-red-100 text-red-800';
+                                const scoreClass = parseFloat(result.average_score) >= 80 ? 'text-green-600 font-bold' :
+                                                 parseFloat(result.average_score) >= 60 ? 'text-yellow-600 font-semibold' :
+                                                 'text-red-600 font-semibold';
+                                
+                                return `
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white font-semibold text-sm">
+                                                    ${(result.participant_name || result.participant_email || 'Unknown').charAt(0).toUpperCase()}
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900">${escapeHtml(result.participant_name || result.participant_email || 'Unknown')}</div>
+                                                    <div class="text-xs text-gray-500">${escapeHtml(result.participant_email || '')}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                            <span class="text-lg ${scoreClass}">${parseFloat(result.average_score).toFixed(1)}%</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full ${varianceClass}">
+                                                ${variance > 0 ? (variance > avgScore ? '+' : '') : ''}${variance.toFixed(1)}%
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                            <span class="text-sm text-gray-900">${result.critical_errors || 0}</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                                            ${new Date(result.submitted_at).toLocaleString()}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                            <button onclick="viewDetailedResult('${result.id}', '${sessionId}')" class="text-primary hover:text-primary-dark text-sm font-medium">
+                                                View Details
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            ` : `
+            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-8 text-center">
+                <svg class="mx-auto h-12 w-12 text-yellow-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">No Results Yet</h3>
+                <p class="text-sm text-gray-600">Calibration results will appear here once participants submit their audits.</p>
+                <p class="text-xs text-gray-500 mt-2">${participants.length - calibrationResults.length} of ${participants.length} participants remaining</p>
+            </div>
+            `}
+        `;
+
+        // Render chart if results exist
+        if (calibrationResults.length > 0 && typeof Chart !== 'undefined') {
+            setTimeout(() => {
+                renderSessionScoreChart(`sessionScoreChart-${sessionId}`, calibrationResults, avgScore);
+            }, 100);
+        }
+
+    } catch (error) {
+        console.error('Error loading session details:', error);
+        modalBody.innerHTML = `
+            <div class="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+                <svg class="mx-auto h-12 w-12 text-red-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Error Loading Results</h3>
+                <p class="text-sm text-gray-600">${escapeHtml(error.message)}</p>
+            </div>
+        `;
+    }
+}
+
+function closeViewSessionModal() {
+    const modal = document.getElementById('viewSessionModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+// Removed activateSession - sessions are now auto-activated on creation
+
+async function completeSession(sessionId) {
+    if (!confirm('Are you sure you want to mark this session as completed? This action cannot be undone.')) {
+        return;
+    }
+
+    try {
+        const { error } = await window.supabaseClient
+            .from('calibration_sessions')
+            .update({ status: 'completed' })
+            .eq('id', sessionId);
+
+        if (error) throw error;
+
+        await loadCalibrationSessions();
+        await loadMyCalibrationSessions();
+        updateStatistics();
+        
+        // Refresh modal if it's open for this session
+        const modal = document.getElementById('viewSessionModal');
+        if (modal && modal.classList.contains('active')) {
+            const currentSessionId = modal.getAttribute('data-session-id');
+            if (currentSessionId === sessionId) {
+                await viewSessionDetails(sessionId);
+            }
+        }
+        
+        alert('Session marked as completed!');
+
+    } catch (error) {
+        console.error('Error completing session:', error);
+        alert('Error completing session: ' + error.message);
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Global variable to track current calibration session
+let currentCalibrationSession = null;
+let currentCalibrationSampleAudit = null;
+
+// Start calibration - open audit form with sample audit data
+async function startCalibration(sessionId) {
+    try {
+        // Find the session
+        const session = myCalibrationSessions.find(s => s.id === sessionId);
+        if (!session) {
+            alert('Session not found');
+            return;
+        }
+
+        if (session.status !== 'active') {
+            alert('This session is not active. Only active sessions can be calibrated.');
+            return;
+        }
+
+        currentCalibrationSession = session;
+
+        // Get scorecard
+        const scorecard = allScorecards.find(s => s.id === session.scorecard_id);
+        if (!scorecard || !scorecard.table_name) {
+            alert('Scorecard not found or invalid');
+            return;
+        }
+
+        // Check if we have an audit_id or interaction_id
+        let sampleAudit = null;
+        
+        if (session.audit_id) {
+            // Load the sample audit from the scorecard's table
+            const { data, error: auditError } = await window.supabaseClient
+                .from(scorecard.table_name)
+                .select('*')
+                .eq('id', session.audit_id)
+                .single();
+
+            if (auditError || !data) {
+                alert('Error loading sample audit: ' + (auditError?.message || 'Audit not found'));
+                return;
+            }
+            sampleAudit = data;
+        } else if (session.interaction_id) {
+            // Create a minimal audit object from interaction_id
+            // This will be used to populate the form with just the interaction_id
+            sampleAudit = {
+                interaction_id: session.interaction_id,
+                scorecard_id: session.scorecard_id,
+                // Other fields will be empty/null - they'll be populated from Intercom if available
+            };
+        } else {
+            alert('No sample audit or interaction ID found for this session');
+            return;
+        }
+
+        currentCalibrationSampleAudit = sampleAudit;
+
+        // Load scorecard parameters
+        const { data: parameters, error: paramsError } = await window.supabaseClient
+            .from('scorecard_parameters')
+            .select('*')
+            .eq('scorecard_id', session.scorecard_id)
+            .eq('is_active', true)
+            .order('display_order', { ascending: true });
+
+        if (paramsError) {
+            alert('Error loading scorecard parameters: ' + paramsError.message);
+            return;
+        }
+
+        // Open the audit form in a new window/tab pointing to create-audit.html with calibration mode
+        const calibrationParams = new URLSearchParams({
+            calibration: 'true',
+            sessionId: sessionId,
+            scorecardId: session.scorecard_id,
+            tableName: scorecard.table_name
+        });
+        
+        // Add audit_id or interaction_id based on what's available
+        if (session.audit_id) {
+            calibrationParams.append('auditId', session.audit_id);
+        }
+        if (session.interaction_id) {
+            calibrationParams.append('interactionId', session.interaction_id);
+        }
+        
+        // Open in new window
+        const calibrationWindow = window.open(`create-audit.html?${calibrationParams.toString()}`, '_blank');
+        
+        // Listen for calibration submission message
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'calibration_submitted') {
+                // Reload my sessions to show updated status
+                reloadMySessions();
+            }
+        });
+
+    } catch (error) {
+        console.error('Error starting calibration:', error);
+        alert('Error starting calibration: ' + error.message);
+    }
+}
+
+async function viewMyCalibrationResult(sessionId) {
+    if (!currentUserEmail) {
+        alert('User email not found');
+        return;
+    }
+
+    const modal = document.getElementById('viewMyResultModal');
+    const modalTitle = document.getElementById('viewMyResultTitle');
+    const modalBody = document.getElementById('viewMyResultBody');
+
+    modalTitle.textContent = 'My Calibration Result';
+    modalBody.innerHTML = '<div class="text-center py-8"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div><p class="mt-2 text-sm text-gray-500">Loading result...</p></div>';
+    modal.classList.add('active');
+
+    try {
+        // Load user's calibration result
+        const { data: results, error } = await window.supabaseClient
+            .from('calibration_results')
+            .select('*')
+            .eq('calibration_session_id', sessionId)
+            .eq('participant_email', currentUserEmail)
+            .order('submitted_at', { ascending: false })
+            .limit(1);
+
+        if (error && error.code !== 'PGRST116') {
+            throw error;
+        }
+
+        if (!results || results.length === 0) {
+            modalBody.innerHTML = `
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-8 text-center">
+                    <svg class="mx-auto h-12 w-12 text-yellow-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">No Result Found</h3>
+                    <p class="text-sm text-gray-600">You haven't submitted a calibration result for this session yet.</p>
+                </div>
+            `;
+            return;
+        }
+
+        const result = results[0];
+        const session = allSessions.find(s => s.id === sessionId) || myCalibrationSessions.find(s => s.id === sessionId);
+        const scorecard = allScorecards.find(s => s.id === session?.scorecard_id);
+
+        // Load scorecard parameters for detailed breakdown
+        let parameters = [];
+        if (session?.scorecard_id) {
+            const { data: params } = await window.supabaseClient
+                .from('scorecard_parameters')
+                .select('*')
+                .eq('scorecard_id', session.scorecard_id)
+                .eq('is_active', true)
+                .order('display_order', { ascending: true });
+            parameters = params || [];
+        }
+
+        // Parse error and feedback parameters
+        const errorParams = result.error_parameters || {};
+        const feedbackParams = result.feedback_parameters || {};
+
+        // Build detailed result view
+        modalBody.innerHTML = `
+            <!-- Score Header -->
+            <div class="mb-6 bg-gradient-to-r from-primary to-primary-dark rounded-xl p-8 text-white shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-2">${escapeHtml(session?.name || 'Calibration Session')}</h2>
+                        <p class="text-primary-100 text-sm">${escapeHtml(scorecard?.name || 'Scorecard')}</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-5xl font-bold mb-1">${parseFloat(result.average_score).toFixed(1)}%</div>
+                        <div class="text-sm text-primary-100">Your Score</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-primary-300">
+                    <div>
+                        <div class="text-xs text-primary-100 mb-1">Critical Errors</div>
+                        <div class="text-xl font-semibold">${result.critical_errors || 0}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-primary-100 mb-1">Significant Errors</div>
+                        <div class="text-xl font-semibold">${result.significant_error || 0}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-primary-100 mb-1">Submitted</div>
+                        <div class="text-sm font-medium">${new Date(result.submitted_at).toLocaleString()}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parameter Breakdown -->
+            ${parameters.length > 0 ? `
+            <div class="mb-6 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                        </svg>
+                        Parameter Breakdown
+                    </h3>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    ${parameters.map(param => {
+                        const errorValue = errorParams[param.field_id] || 0;
+                        const feedback = feedbackParams[`feedback_${param.field_id}`] || [];
+                        const maxScore = param.max_score || 10;
+                        const score = maxScore - (errorValue * (param.points_per_error || 1));
+                        const scorePercent = (score / maxScore) * 100;
+                        
+                        return `
+                            <div class="p-6 hover:bg-gray-50 transition-colors">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex-1">
+                                        <h4 class="text-sm font-semibold text-gray-900 mb-1">${escapeHtml(param.parameter_name)}</h4>
+                                        <p class="text-xs text-gray-600">${escapeHtml(param.description || '')}</p>
+                                    </div>
+                                    <div class="ml-4 text-right">
+                                        <div class="text-lg font-bold ${scorePercent >= 80 ? 'text-green-600' : scorePercent >= 60 ? 'text-yellow-600' : 'text-red-600'}">
+                                            ${score.toFixed(1)}/${maxScore}
+                                        </div>
+                                        <div class="text-xs text-gray-500">${scorePercent.toFixed(0)}%</div>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <div class="flex items-center justify-between text-xs text-gray-600 mb-1">
+                                        <span>Errors: ${errorValue}</span>
+                                        <span>Points Deducted: ${(errorValue * (param.points_per_error || 1)).toFixed(1)}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="h-2 rounded-full transition-all ${scorePercent >= 80 ? 'bg-green-500' : scorePercent >= 60 ? 'bg-yellow-500' : 'bg-red-500'}" 
+                                             style="width: ${scorePercent}%"></div>
+                                    </div>
+                                </div>
+                                ${feedback.length > 0 ? `
+                                <div class="mt-3 pt-3 border-t border-gray-200">
+                                    <div class="text-xs font-semibold text-gray-700 mb-2">Feedback:</div>
+                                    <ul class="space-y-1">
+                                        ${feedback.map(fb => `<li class="text-xs text-gray-600 flex items-start gap-2">
+                                            <svg class="w-3 h-3 text-primary mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <span>${escapeHtml(fb)}</span>
+                                        </li>`).join('')}
+                                    </ul>
+                                </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+            ` : ''}
+
+            <!-- Transcript -->
+            ${result.transcript ? `
+            <div class="mb-6 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Transcript
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <div class="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">${escapeHtml(result.transcript)}</div>
+                </div>
+            </div>
+            ` : ''}
+
+            <!-- Recommendations -->
+            ${result.recommendations ? `
+            <div class="mb-6 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                        Recommendations
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <div class="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">${escapeHtml(result.recommendations)}</div>
+                </div>
+            </div>
+            ` : ''}
+        `;
+
+    } catch (error) {
+        console.error('Error loading calibration result:', error);
+        modalBody.innerHTML = `
+            <div class="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+                <svg class="mx-auto h-12 w-12 text-red-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Error Loading Result</h3>
+                <p class="text-sm text-gray-600">${escapeHtml(error.message)}</p>
+            </div>
+        `;
+    }
+}
+
+function closeViewMyResultModal() {
+    const modal = document.getElementById('viewMyResultModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+// View detailed result for a specific participant
+async function viewDetailedResult(resultId, sessionId) {
+    try {
+        const { data: result, error } = await window.supabaseClient
+            .from('calibration_results')
+            .select('*')
+            .eq('id', resultId)
+            .single();
+
+        if (error) throw error;
+
+        // Open in a new modal or expand in current view
+        // For now, we'll show an alert with key details, but this could be expanded
+        const session = allSessions.find(s => s.id === sessionId) || myCalibrationSessions.find(s => s.id === sessionId);
+        const scorecard = allScorecards.find(s => s.id === session?.scorecard_id);
+
+        // Create a detailed view modal (similar to viewMyCalibrationResult)
+        // For simplicity, we'll reuse the same modal structure
+        viewMyCalibrationResult(sessionId);
+        
+        // Scroll to top of modal
+        setTimeout(() => {
+            const modalBody = document.getElementById('viewMyResultBody');
+            if (modalBody) {
+                modalBody.scrollTop = 0;
+            }
+        }, 100);
+
+    } catch (error) {
+        console.error('Error loading detailed result:', error);
+        alert('Error loading result details: ' + error.message);
+    }
+}
+
+// Render score comparison chart for session
+function renderSessionScoreChart(canvasId, results, avgScore) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || typeof Chart === 'undefined') return;
+
+    const labels = results.map((r, i) => {
+        const name = r.participant_name || r.participant_email || `Participant ${i + 1}`;
+        return name.length > 15 ? name.substring(0, 15) + '...' : name;
+    });
+    const scores = results.map(r => parseFloat(r.average_score));
+
+    new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Participant Score',
+                    data: scores,
+                    backgroundColor: scores.map(score => {
+                        if (score >= 80) return 'rgba(16, 185, 129, 0.7)';
+                        if (score >= 60) return 'rgba(245, 158, 11, 0.7)';
+                        return 'rgba(239, 68, 68, 0.7)';
+                    }),
+                    borderColor: scores.map(score => {
+                        if (score >= 80) return 'rgb(16, 185, 129)';
+                        if (score >= 60) return 'rgb(245, 158, 11)';
+                        return 'rgb(239, 68, 68)';
+                    }),
+                    borderWidth: 2
+                },
+                {
+                    label: 'Average Score',
+                    data: Array(scores.length).fill(avgScore),
+                    type: 'line',
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointRadius: 0,
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (context.datasetIndex === 0) {
+                                return `Score: ${context.parsed.y.toFixed(1)}%`;
+                            } else {
+                                return `Average: ${context.parsed.y.toFixed(1)}%`;
+                            }
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Reload my sessions after calibration submission
+async function reloadMySessions() {
+    await loadMyCalibrationSessions();
+}
+
+// Close modals when clicking outside
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.classList.remove('active');
+    }
+});
+
+// Close modals with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        document.querySelectorAll('.modal.active').forEach(modal => {
+            modal.classList.remove('active');
+        });
+    }
+});
+
+// ============================================================================
+// Advanced Analytics Functions
+// ============================================================================
+
+// Global analytics variables
+let analyticsData = {
+    preCalibration: {},
+    postCalibration: {},
+    sessions: [],
+    agreementChart: null
+};
+
+// Initialize analytics - called after main calibration initialization
+async function initializeAnalytics() {
+    try {
+        // Wait a bit for main data to load
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        if (window.supabaseClient) {
+            await populateAnalyticsFilters();
+            await loadAnalyticsData();
+        }
+    } catch (error) {
+        console.error('Error initializing analytics:', error);
+    }
+}
+
+// Load all analytics data
+async function loadAnalyticsData() {
+    try {
+        showAnalyticsLoading(true);
+        
+        // Load pre-calibration data (regular audits)
+        await loadPreCalibrationData();
+        
+        // Load post-calibration data (calibration results)
+        await loadPostCalibrationData();
+        
+        // Calculate and render analytics
+        calculateAndRenderAnalytics();
+        
+        showAnalyticsLoading(false);
+    } catch (error) {
+        console.error('Error loading analytics data:', error);
+        showAnalyticsLoading(false);
+        showAnalyticsEmpty(true);
+    }
+}
+
+// Load pre-calibration data from regular audits
+async function loadPreCalibrationData() {
+    try {
+        analyticsData.preCalibration = {};
+        
+        // Get all scorecards
+        const { data: scorecards } = await window.supabaseClient
+            .from('scorecards')
+            .select('id, name, table_name')
+            .eq('is_active', true);
+        
+        if (!scorecards || scorecards.length === 0) {
+            console.log('No scorecards found for pre-calibration data');
+            return;
+        }
+        
+        // Get filter values
+        const dateFrom = document.getElementById('analyticsDateFrom')?.value;
+        const dateTo = document.getElementById('analyticsDateTo')?.value;
+        const scorecardFilter = document.getElementById('analyticsScorecardFilter')?.value;
+        const auditorFilter = document.getElementById('analyticsAuditorFilter')?.value;
+        
+        // Load audits from all scorecard tables
+        for (const scorecard of scorecards) {
+            // Apply scorecard filter if set
+            if (scorecardFilter && scorecard.id !== scorecardFilter) continue;
+            
+            try {
+                let query = window.supabaseClient
+                    .from(scorecard.table_name)
+                    .select('auditor_email, auditor_name, average_score, submitted_at')
+                    .not('average_score', 'is', null)
+                    .not('auditor_email', 'is', null);
+                
+                // Apply date filters
+                if (dateFrom) {
+                    query = query.gte('submitted_at', dateFrom);
+                }
+                if (dateTo) {
+                    const endDate = new Date(dateTo);
+                    endDate.setHours(23, 59, 59, 999);
+                    query = query.lte('submitted_at', endDate.toISOString());
+                }
+                
+                const { data: audits, error } = await query;
+                
+                if (error) {
+                    console.warn(`Error loading audits from ${scorecard.table_name}:`, error);
+                    continue;
+                }
+                
+                if (!audits || audits.length === 0) continue;
+                
+                // Group by auditor
+                audits.forEach(audit => {
+                    const email = (audit.auditor_email || '').toLowerCase().trim();
+                    if (!email) return;
+                    
+                    // Apply auditor filter if set
+                    if (auditorFilter && email !== auditorFilter.toLowerCase().trim()) return;
+                    
+                    if (!analyticsData.preCalibration[email]) {
+                        analyticsData.preCalibration[email] = {
+                            email: email,
+                            name: audit.auditor_name || email.split('@')[0],
+                            scores: []
+                        };
+                    }
+                    
+                    const score = parseFloat(audit.average_score);
+                    if (!isNaN(score)) {
+                        analyticsData.preCalibration[email].scores.push(score);
+                    }
+                });
+            } catch (err) {
+                console.warn(`Error processing scorecard ${scorecard.name}:`, err);
+                continue;
+            }
+        }
+        
+        console.log('Pre-calibration data loaded:', Object.keys(analyticsData.preCalibration).length, 'auditors');
+    } catch (error) {
+        console.error('Error loading pre-calibration data:', error);
+        throw error;
+    }
+}
+
+// Load post-calibration data from calibration_results
+async function loadPostCalibrationData() {
+    try {
+        analyticsData.postCalibration = {};
+        analyticsData.sessions = [];
+        
+        // Get filter values
+        const dateFrom = document.getElementById('analyticsDateFrom')?.value;
+        const dateTo = document.getElementById('analyticsDateTo')?.value;
+        const scorecardFilter = document.getElementById('analyticsScorecardFilter')?.value;
+        const auditorFilter = document.getElementById('analyticsAuditorFilter')?.value;
+        
+        let query = window.supabaseClient
+            .from('calibration_results')
+            .select('*, calibration_sessions(*)')
+            .not('average_score', 'is', null)
+            .not('participant_email', 'is', null);
+        
+        // Apply date filters
+        if (dateFrom) {
+            query = query.gte('submitted_at', dateFrom);
+        }
+        if (dateTo) {
+            const endDate = new Date(dateTo);
+            endDate.setHours(23, 59, 59, 999);
+            query = query.lte('submitted_at', endDate.toISOString());
+        }
+        
+        // Apply scorecard filter
+        if (scorecardFilter) {
+            query = query.eq('scorecard_id', scorecardFilter);
+        }
+        
+        const { data: results, error } = await query;
+        
+        if (error) {
+            if (error.code === 'PGRST116') {
+                console.log('calibration_results table does not exist yet');
+                return;
+            }
+            throw error;
+        }
+        
+        if (!results || results.length === 0) {
+            console.log('No calibration results found');
+            return;
+        }
+        
+        // Group by participant (auditor)
+        const sessionMap = {};
+        
+        results.forEach(result => {
+            const email = (result.participant_email || '').toLowerCase().trim();
+            if (!email) return;
+            
+            // Apply auditor filter if set
+            if (auditorFilter && email !== auditorFilter.toLowerCase().trim()) return;
+            
+            if (!analyticsData.postCalibration[email]) {
+                analyticsData.postCalibration[email] = {
+                    email: email,
+                    name: result.participant_name || email.split('@')[0],
+                    scores: [],
+                    sessionIds: new Set()
+                };
+            }
+            
+            const score = parseFloat(result.average_score);
+            if (!isNaN(score)) {
+                analyticsData.postCalibration[email].scores.push(score);
+            }
+            
+            // Track sessions for agreement calculation
+            const sessionId = result.calibration_session_id;
+            if (sessionId) {
+                analyticsData.postCalibration[email].sessionIds.add(sessionId);
+                
+                if (!sessionMap[sessionId]) {
+                    sessionMap[sessionId] = {
+                        id: sessionId,
+                        name: result.calibration_sessions?.name || `Session ${sessionId}`,
+                        results: []
+                    };
+                }
+                
+                sessionMap[sessionId].results.push({
+                    email: email,
+                    name: result.participant_name || email.split('@')[0],
+                    score: score,
+                    submitted_at: result.submitted_at
+                });
+            }
+        });
+        
+        // Convert session map to array
+        analyticsData.sessions = Object.values(sessionMap);
+        
+        console.log('Post-calibration data loaded:', Object.keys(analyticsData.postCalibration).length, 'auditors');
+        console.log('Sessions loaded:', analyticsData.sessions.length);
+    } catch (error) {
+        console.error('Error loading post-calibration data:', error);
+        throw error;
+    }
+}
+
+// Calculate metrics for a set of scores
+function calculateMetrics(scores) {
+    if (!scores || scores.length === 0) {
+        return {
+            avgScore: 0,
+            variance: 0,
+            stdDev: 0,
+            consistency: 0,
+            minScore: 0,
+            maxScore: 0,
+            count: 0
+        };
+    }
+    
+    const count = scores.length;
+    const sum = scores.reduce((a, b) => a + b, 0);
+    const avgScore = sum / count;
+    
+    // Calculate variance and standard deviation
+    const variance = scores.reduce((sum, score) => sum + Math.pow(score - avgScore, 2), 0) / count;
+    const stdDev = Math.sqrt(variance);
+    
+    // Calculate consistency (inverted coefficient of variation, normalized to 0-100)
+    const coefficientOfVariation = avgScore > 0 ? (stdDev / avgScore) * 100 : 0;
+    const consistency = Math.max(0, 100 - Math.min(100, coefficientOfVariation * 2));
+    
+    const minScore = Math.min(...scores);
+    const maxScore = Math.max(...scores);
+    
+    return {
+        avgScore: Math.round(avgScore * 10) / 10,
+        variance: Math.round(variance * 10) / 10,
+        stdDev: Math.round(stdDev * 10) / 10,
+        consistency: Math.round(consistency * 10) / 10,
+        minScore: Math.round(minScore * 10) / 10,
+        maxScore: Math.round(maxScore * 10) / 10,
+        count: count
+    };
+}
+
+// Calculate agreement metrics for a session
+function calculateSessionAgreement(session) {
+    if (!session.results || session.results.length < 2) {
+        return {
+            agreementRate: 0,
+            scoreSpread: 0,
+            consensusLevel: 0,
+            avgScore: 0
+        };
+    }
+    
+    const scores = session.results.map(r => r.score);
+    const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+    const scoreSpread = Math.max(...scores) - Math.min(...scores);
+    const stdDev = Math.sqrt(scores.reduce((sum, score) => sum + Math.pow(score - avgScore, 2), 0) / scores.length);
+    
+    // Agreement rate: percentage of scores within ±5% of mean
+    const threshold = 5;
+    const withinThreshold = scores.filter(score => Math.abs(score - avgScore) <= threshold).length;
+    const agreementRate = (withinThreshold / scores.length) * 100;
+    
+    // Consensus level: inverse of standard deviation (higher = more consensus)
+    const consensusLevel = Math.max(0, 100 - (stdDev * 5));
+    
+    return {
+        agreementRate: Math.round(agreementRate * 10) / 10,
+        scoreSpread: Math.round(scoreSpread * 10) / 10,
+        consensusLevel: Math.round(consensusLevel * 10) / 10,
+        avgScore: Math.round(avgScore * 10) / 10
+    };
+}
+
+// Calculate and render all analytics
+function calculateAndRenderAnalytics() {
+    // Get all unique auditors
+    const allAuditorEmails = new Set([
+        ...Object.keys(analyticsData.preCalibration),
+        ...Object.keys(analyticsData.postCalibration)
+    ]);
+    
+    if (allAuditorEmails.size === 0) {
+        showAnalyticsEmpty(true);
+        return;
+    }
+    
+    showAnalyticsEmpty(false);
+    
+    // Calculate metrics for each auditor
+    const comparisonData = [];
+    
+    allAuditorEmails.forEach(email => {
+        const preData = analyticsData.preCalibration[email];
+        const postData = analyticsData.postCalibration[email];
+        
+        const preMetrics = preData ? calculateMetrics(preData.scores) : null;
+        const postMetrics = postData ? calculateMetrics(postData.scores) : null;
+        
+        // Calculate changes
+        let scoreDelta = 0;
+        let varianceDelta = 0;
+        let consistencyDelta = 0;
+        let trend = 'neutral';
+        
+        if (preMetrics && postMetrics) {
+            scoreDelta = postMetrics.avgScore - preMetrics.avgScore;
+            varianceDelta = postMetrics.variance - preMetrics.variance;
+            consistencyDelta = postMetrics.consistency - preMetrics.consistency;
+            
+            // Determine trend
+            if (consistencyDelta > 2 && varianceDelta < -2) {
+                trend = 'improving';
+            } else if (consistencyDelta < -2 && varianceDelta > 2) {
+                trend = 'declining';
+            } else {
+                trend = 'stable';
+            }
+        }
+        
+        comparisonData.push({
+            email: email,
+            name: (preData?.name || postData?.name || email.split('@')[0]),
+            preMetrics: preMetrics,
+            postMetrics: postMetrics,
+            change: {
+                scoreDelta: Math.round(scoreDelta * 10) / 10,
+                varianceDelta: Math.round(varianceDelta * 10) / 10,
+                consistencyDelta: Math.round(consistencyDelta * 10) / 10,
+                trend: trend
+            }
+        });
+    });
+    
+    // Sort by name
+    comparisonData.sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Update summary cards
+    updateSummaryCards(comparisonData);
+    
+    // Render comparison table
+    renderComparisonTable(comparisonData);
+    
+    // Calculate and render agreement metrics
+    calculateAndRenderAgreement();
+}
+
+// Update summary cards
+function updateSummaryCards(comparisonData) {
+    const preCount = Object.values(analyticsData.preCalibration).reduce((sum, data) => sum + data.scores.length, 0);
+    const postCount = Object.values(analyticsData.postCalibration).reduce((sum, data) => sum + data.scores.length, 0);
+    
+    // Calculate average agreement rate
+    const sessionAgreements = analyticsData.sessions.map(s => calculateSessionAgreement(s));
+    const avgAgreement = sessionAgreements.length > 0
+        ? sessionAgreements.reduce((sum, a) => sum + a.agreementRate, 0) / sessionAgreements.length
+        : 0;
+    
+    document.getElementById('preCalibrationCount').textContent = preCount.toLocaleString();
+    document.getElementById('postCalibrationCount').textContent = postCount.toLocaleString();
+    document.getElementById('avgAgreementRate').textContent = avgAgreement > 0 ? `${Math.round(avgAgreement)}%` : '-';
+    document.getElementById('auditorsAnalyzed').textContent = comparisonData.length;
+}
+
+// Render comparison table
+function renderComparisonTable(comparisonData) {
+    const tbody = document.getElementById('comparisonTableBody');
+    if (!tbody) return;
+    
+    if (comparisonData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="12" class="px-4 py-4 text-center text-gray-500">No data available</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = comparisonData.map(auditor => {
+        const pre = auditor.preMetrics;
+        const post = auditor.postMetrics;
+        const change = auditor.change;
+        
+        // Determine trend color and icon
+        let trendColor = 'text-gray-600';
+        let trendIcon = '→';
+        let trendText = 'Stable';
+        
+        if (change.trend === 'improving') {
+            trendColor = 'text-green-600';
+            trendIcon = '↑';
+            trendText = 'Improving';
+        } else if (change.trend === 'declining') {
+            trendColor = 'text-red-600';
+            trendIcon = '↓';
+            trendText = 'Declining';
+        }
+        
+        // Format change values with colors
+        const scoreDeltaClass = change.scoreDelta > 0 ? 'text-green-600' : change.scoreDelta < 0 ? 'text-red-600' : 'text-gray-600';
+        const varianceDeltaClass = change.varianceDelta < 0 ? 'text-green-600' : change.varianceDelta > 0 ? 'text-red-600' : 'text-gray-600';
+        
+        return `
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium text-gray-900 sticky left-0 bg-white">${escapeHtml(auditor.name)}</td>
+                <!-- Pre-Calibration -->
+                <td class="px-3 py-3 text-center text-gray-700 bg-blue-50">${pre ? pre.avgScore.toFixed(1) + '%' : '-'}</td>
+                <td class="px-3 py-3 text-center text-gray-700 bg-blue-50">${pre ? pre.variance.toFixed(1) : '-'}</td>
+                <td class="px-3 py-3 text-center text-gray-700 bg-blue-50">${pre ? pre.consistency.toFixed(1) + '%' : '-'}</td>
+                <td class="px-3 py-3 text-center text-gray-700 bg-blue-50">${pre ? pre.count : '-'}</td>
+                <!-- Post-Calibration -->
+                <td class="px-3 py-3 text-center text-gray-700 bg-green-50 border-l-2 border-green-300">${post ? post.avgScore.toFixed(1) + '%' : '-'}</td>
+                <td class="px-3 py-3 text-center text-gray-700 bg-green-50">${post ? post.variance.toFixed(1) : '-'}</td>
+                <td class="px-3 py-3 text-center text-gray-700 bg-green-50">${post ? post.consistency.toFixed(1) + '%' : '-'}</td>
+                <td class="px-3 py-3 text-center text-gray-700 bg-green-50">${post ? post.count : '-'}</td>
+                <!-- Change -->
+                <td class="px-3 py-3 text-center font-semibold ${scoreDeltaClass} bg-purple-50 border-l-2 border-purple-300">
+                    ${pre && post ? (change.scoreDelta > 0 ? '+' : '') + change.scoreDelta.toFixed(1) + '%' : '-'}
+                </td>
+                <td class="px-3 py-3 text-center font-semibold ${varianceDeltaClass} bg-purple-50">
+                    ${pre && post ? (change.varianceDelta > 0 ? '+' : '') + change.varianceDelta.toFixed(1) : '-'}
+                </td>
+                <td class="px-3 py-3 text-center font-semibold ${trendColor} bg-purple-50">
+                    ${pre && post ? `${trendIcon} ${trendText}` : '-'}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Calculate and render agreement metrics
+function calculateAndRenderAgreement() {
+    // Calculate agreement for each session
+    const sessionAgreements = analyticsData.sessions.map(session => {
+        const agreement = calculateSessionAgreement(session);
+        return {
+            ...session,
+            ...agreement
+        };
+    });
+    
+    // Sort by date (most recent first)
+    sessionAgreements.sort((a, b) => {
+        const dateA = a.results && a.results.length > 0 ? (a.results[0].submitted_at || 0) : 0;
+        const dateB = b.results && b.results.length > 0 ? (b.results[0].submitted_at || 0) : 0;
+        return new Date(dateB) - new Date(dateA);
+    });
+    
+    // Render agreement table
+    renderAgreementTable(sessionAgreements);
+    
+    // Render agreement chart
+    renderAgreementChart(sessionAgreements);
+}
+
+// Render agreement table
+function renderAgreementTable(sessionAgreements) {
+    const tbody = document.getElementById('agreementTableBody');
+    if (!tbody) return;
+    
+    if (sessionAgreements.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-4 text-center text-gray-500">No session data available</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = sessionAgreements.map(session => {
+        const agreementColor = session.agreementRate >= 80 ? 'text-green-600' : session.agreementRate >= 60 ? 'text-yellow-600' : 'text-red-600';
+        const consensusColor = session.consensusLevel >= 80 ? 'text-green-600' : session.consensusLevel >= 60 ? 'text-yellow-600' : 'text-red-600';
+        
+        return `
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium text-gray-900">${escapeHtml(session.name)}</td>
+                <td class="px-4 py-3 text-center text-gray-700">${session.results?.length || 0}</td>
+                <td class="px-4 py-3 text-center text-gray-700">${session.avgScore.toFixed(1)}%</td>
+                <td class="px-4 py-3 text-center text-gray-700">${session.scoreSpread.toFixed(1)}%</td>
+                <td class="px-4 py-3 text-center font-semibold ${agreementColor}">${session.agreementRate.toFixed(1)}%</td>
+                <td class="px-4 py-3 text-center font-semibold ${consensusColor}">${session.consensusLevel.toFixed(1)}%</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Render agreement chart
+function renderAgreementChart(sessionAgreements) {
+    const canvas = document.getElementById('agreementChart');
+    if (!canvas || typeof Chart === 'undefined') return;
+    
+    // Destroy existing chart
+    if (analyticsData.agreementChart) {
+        analyticsData.agreementChart.destroy();
+    }
+    
+    // Sort by date for chart
+    const sortedSessions = [...sessionAgreements].sort((a, b) => {
+        const dateA = a.results && a.results.length > 0 ? (a.results[0].submitted_at || new Date(0)) : new Date(0);
+        const dateB = b.results && b.results.length > 0 ? (b.results[0].submitted_at || new Date(0)) : new Date(0);
+        return new Date(dateA) - new Date(dateB);
+    });
+    
+    const labels = sortedSessions.map(s => s.name.length > 20 ? s.name.substring(0, 20) + '...' : s.name);
+    const agreementRates = sortedSessions.map(s => s.agreementRate);
+    const consensusLevels = sortedSessions.map(s => s.consensusLevel);
+    
+    analyticsData.agreementChart = new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Agreement Rate (%)',
+                    data: agreementRates,
+                    borderColor: '#1a733e',
+                    backgroundColor: 'rgba(26, 115, 62, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Consensus Level (%)',
+                    data: consensusLevels,
+                    borderColor: '#9333ea',
+                    backgroundColor: 'rgba(147, 51, 234, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Show/hide loading state
+function showAnalyticsLoading(show) {
+    const loading = document.getElementById('analyticsLoading');
+    const content = document.getElementById('analyticsContent');
+    const empty = document.getElementById('analyticsEmpty');
+    
+    if (loading) loading.classList.toggle('hidden', !show);
+    if (content) content.classList.toggle('hidden', show);
+    if (empty) empty.classList.add('hidden');
+}
+
+// Show/hide empty state
+function showAnalyticsEmpty(show) {
+    const loading = document.getElementById('analyticsLoading');
+    const content = document.getElementById('analyticsContent');
+    const empty = document.getElementById('analyticsEmpty');
+    
+    if (loading) loading.classList.add('hidden');
+    if (content) content.classList.toggle('hidden', show);
+    if (empty) empty.classList.toggle('hidden', !show);
+}
+
+// Populate analytics filters
+async function populateAnalyticsFilters() {
+    try {
+        // Populate scorecard filter
+        const scorecardFilter = document.getElementById('analyticsScorecardFilter');
+        if (scorecardFilter && allScorecards) {
+            allScorecards.forEach(scorecard => {
+                const option = document.createElement('option');
+                option.value = scorecard.id;
+                option.textContent = scorecard.name;
+                scorecardFilter.appendChild(option);
+            });
+        }
+        
+        // Populate auditor filter (from quality analysts)
+        const auditorFilter = document.getElementById('analyticsAuditorFilter');
+        if (auditorFilter && allQualityAnalysts) {
+            allQualityAnalysts.forEach(analyst => {
+                const option = document.createElement('option');
+                option.value = analyst.email;
+                option.textContent = analyst.name || analyst.email;
+                auditorFilter.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error populating analytics filters:', error);
+    }
+}
+
+// Apply analytics filters
+async function applyAnalyticsFilters() {
+    await loadAnalyticsData();
+}
+
+// Clear analytics filters
+function clearAnalyticsFilters() {
+    document.getElementById('analyticsDateFrom').value = '';
+    document.getElementById('analyticsDateTo').value = '';
+    document.getElementById('analyticsScorecardFilter').value = '';
+    document.getElementById('analyticsAuditorFilter').value = '';
+    loadAnalyticsData();
+}
+
+// Refresh analytics
+async function refreshAnalytics() {
+    await loadAnalyticsData();
+}
+
+// Export analytics data
+function exportAnalyticsData() {
+    try {
+        const allAuditorEmails = new Set([
+            ...Object.keys(analyticsData.preCalibration),
+            ...Object.keys(analyticsData.postCalibration)
+        ]);
+        
+        if (allAuditorEmails.size === 0) {
+            alert('No data to export');
+            return;
+        }
+        
+        const rows = [];
+        rows.push([
+            'Auditor Name',
+            'Auditor Email',
+            'Pre-Avg Score', 'Pre-Variance', 'Pre-Consistency', 'Pre-Count',
+            'Post-Avg Score', 'Post-Variance', 'Post-Consistency', 'Post-Count',
+            'Score Delta', 'Variance Delta', 'Consistency Delta', 'Trend'
+        ]);
+        
+        allAuditorEmails.forEach(email => {
+            const preData = analyticsData.preCalibration[email];
+            const postData = analyticsData.postCalibration[email];
+            const preMetrics = preData ? calculateMetrics(preData.scores) : null;
+            const postMetrics = postData ? calculateMetrics(postData.scores) : null;
+            
+            let scoreDelta = 0, varianceDelta = 0, consistencyDelta = 0, trend = 'neutral';
+            if (preMetrics && postMetrics) {
+                scoreDelta = postMetrics.avgScore - preMetrics.avgScore;
+                varianceDelta = postMetrics.variance - preMetrics.variance;
+                consistencyDelta = postMetrics.consistency - preMetrics.consistency;
+                trend = consistencyDelta > 2 && varianceDelta < -2 ? 'improving' : 
+                       consistencyDelta < -2 && varianceDelta > 2 ? 'declining' : 'stable';
+            }
+            
+            rows.push([
+                (preData?.name || postData?.name || email.split('@')[0]),
+                email,
+                preMetrics ? preMetrics.avgScore : '',
+                preMetrics ? preMetrics.variance : '',
+                preMetrics ? preMetrics.consistency : '',
+                preMetrics ? preMetrics.count : '',
+                postMetrics ? postMetrics.avgScore : '',
+                postMetrics ? postMetrics.variance : '',
+                postMetrics ? postMetrics.consistency : '',
+                postMetrics ? postMetrics.count : '',
+                preMetrics && postMetrics ? scoreDelta : '',
+                preMetrics && postMetrics ? varianceDelta : '',
+                preMetrics && postMetrics ? consistencyDelta : '',
+                trend
+            ]);
+        });
+        
+        const csv = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `calibration-analytics-${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (error) {
+        console.error('Error exporting analytics:', error);
+        alert('Error exporting data: ' + error.message);
+    }
+}
+</script>
+
+</body>
+</html>
